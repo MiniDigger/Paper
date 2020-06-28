@@ -148,10 +148,10 @@ index 0000000000000000000000000000000000000000..9cd98c6fcfa3eb439d9013ef76ef4661
 +}
 diff --git a/src/main/java/com/destroystokyo/paper/entity/ai/GoalType.java b/src/main/java/com/destroystokyo/paper/entity/ai/GoalType.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..e2b44aff21e6818512a81f03a3bff913abf61f9f
+index 0000000000000000000000000000000000000000..942b97365ecc0960b0486f5871fb25f4768d310b
 --- /dev/null
 +++ b/src/main/java/com/destroystokyo/paper/entity/ai/GoalType.java
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,17 @@
 +package com.destroystokyo.paper.entity.ai;
 +
 +/**
@@ -162,6 +162,10 @@ index 0000000000000000000000000000000000000000..e2b44aff21e6818512a81f03a3bff913
 +    MOVE,
 +    LOOK,
 +    JUMP,
++    /**
++     * Used to map vanilla goals, that are a behavior goal but don't have a type set...
++     */
++    UNKNOWN_BEHAVIOR,
 +    TARGET
 +
 +}
