@@ -1,14 +1,6 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/server/level/ServerPlayerGameMode.java b/net/minecraft/server/level/ServerPlayerGameMode.java
-index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f82496e9a9487 100644
 --- a/net/minecraft/server/level/ServerPlayerGameMode.java
 +++ b/net/minecraft/server/level/ServerPlayerGameMode.java
-@@ -41,28 +41,50 @@ public class ServerPlayerGameMode {
+@@ -45,28 +_,50 @@
      private BlockPos delayedDestroyPos = BlockPos.ZERO;
      private int delayedTickStart;
      private int lastSentState = -1;
@@ -49,8 +41,8 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
 +            this.setGameModeForPlayer(gameModeForPlayer, this.gameModeForPlayer); // Paper - Fix MC-259571
              this.player.onUpdateAbilities();
              this.player
-                 .server
-                 .getPlayerList()
+                 .theGame()
+                 .playerList()
 -                .broadcastAll(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE, this.player));
 +                .broadcastAll(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE, this.player), this.player); // CraftBukkit
              this.level.updateSleepingPlayerList();
@@ -63,7 +55,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
          }
      }
  
-@@ -90,10 +112,11 @@ public class ServerPlayerGameMode {
+@@ -94,10 +_,11 @@
      }
  
      public void tick() {
@@ -78,7 +70,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
                  this.hasDelayedDestroy = false;
              } else {
                  float f = this.incrementDestroyProgress(blockState, this.delayedDestroyPos, this.delayedTickStart);
-@@ -103,7 +126,13 @@ public class ServerPlayerGameMode {
+@@ -107,7 +_,13 @@
                  }
              }
          } else if (this.isDestroyingBlock) {
@@ -93,7 +85,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
              if (blockState.isAir()) {
                  this.level.destroyBlockProgress(this.player.getId(), this.destroyPos, -1);
                  this.lastSentState = -1;
-@@ -131,6 +160,7 @@ public class ServerPlayerGameMode {
+@@ -135,6 +_,7 @@
  
      public void handleBlockBreakAction(BlockPos pos, ServerboundPlayerActionPacket.Action action, Direction face, int maxBuildHeight, int sequence) {
          if (!this.player.canInteractWithBlock(pos, 1.0)) {
@@ -101,7 +93,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
              this.debugLogging(pos, false, sequence, "too far");
          } else if (pos.getY() > maxBuildHeight) {
              this.player.connection.send(new ClientboundBlockUpdatePacket(pos, this.level.getBlockState(pos)));
-@@ -138,16 +168,35 @@ public class ServerPlayerGameMode {
+@@ -142,16 +_,35 @@
          } else {
              if (action == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
                  if (!this.level.mayInteract(this.player, pos)) {
@@ -109,6 +101,8 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
 +                    org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerInteractEvent(this.player, org.bukkit.event.block.Action.LEFT_CLICK_BLOCK, pos, face, this.player.getInventory().getSelectedItem(), InteractionHand.MAIN_HAND);
                      this.player.connection.send(new ClientboundBlockUpdatePacket(pos, this.level.getBlockState(pos)));
                      this.debugLogging(pos, false, sequence, "may not interact");
+-                    return;
+-                }
 +                    this.capturedBlockEntity = true; // Paper - Send block entities after destroy prediction
 +                    // CraftBukkit end
 +                    return;
@@ -118,8 +112,8 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
 +                org.bukkit.event.player.PlayerInteractEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerInteractEvent(this.player, org.bukkit.event.block.Action.LEFT_CLICK_BLOCK, pos, face, this.player.getInventory().getSelectedItem(), InteractionHand.MAIN_HAND);
 +                if (event.isCancelled()) {
 +                    this.capturedBlockEntity = true; // Paper - Send block entities after destroy prediction
-                     return;
-                 }
++                    return;
++                }
 +                // CraftBukkit end
  
                  if (this.player.getAbilities().instabuild) {
@@ -137,17 +131,17 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
                  if (this.player.blockActionRestricted(this.level, pos, this.gameModeForPlayer)) {
                      this.player.connection.send(new ClientboundBlockUpdatePacket(pos, this.level.getBlockState(pos)));
                      this.debugLogging(pos, false, sequence, "block action restricted");
-@@ -157,7 +206,7 @@ public class ServerPlayerGameMode {
-                 this.destroyProgressStart = this.gameTicks;
-                 float f = 1.0F;
-                 BlockState blockState = this.level.getBlockState(pos);
+@@ -165,7 +_,7 @@
+                     return;
+                 }
+ 
 -                if (!blockState.isAir()) {
 +                if (event.useInteractedBlock() != org.bukkit.event.Event.Result.DENY && !blockState.isAir()) { // Paper
                      EnchantmentHelper.onHitBlock(
                          this.level,
                          this.player.getMainHandItem(),
-@@ -172,6 +221,23 @@ public class ServerPlayerGameMode {
-                     f = blockState.getDestroyProgress(this.player, this.player.level(), pos);
+@@ -185,6 +_,23 @@
+                     }
                  }
  
 +                // CraftBukkit start
@@ -170,7 +164,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
                  if (!blockState.isAir() && f >= 1.0F) {
                      this.destroyAndAck(pos, sequence, "insta mine");
                  } else {
-@@ -212,14 +278,22 @@ public class ServerPlayerGameMode {
+@@ -225,14 +_,22 @@
                  this.debugLogging(pos, true, sequence, "stopped destroying");
              } else if (action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
                  this.isDestroyingBlock = false;
@@ -195,7 +189,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
              }
          }
      }
-@@ -235,36 +309,108 @@ public class ServerPlayerGameMode {
+@@ -248,17 +_,64 @@
  
      public boolean destroyBlock(BlockPos pos) {
          BlockState blockState = this.level.getBlockState(pos);
@@ -262,6 +256,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
                  BlockState blockState1 = block.playerWillDestroy(this.level, pos, blockState, this.player);
                  boolean flag = this.level.removeBlock(pos, false);
                  if (flag) {
+@@ -266,19 +_,44 @@
                      block.destroy(this.level, pos, blockState1);
                  }
  
@@ -279,11 +274,14 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
                      mainHandItem.mineBlock(this.level, blockState1, pos, this.player);
 -                    if (flag && hasCorrectToolForDrops) {
 -                        block.playerDestroy(this.level, this.player, pos, blockState1, blockEntity, itemStack);
+-                    }
+-
+-                    return true;
+-                }
 +                    if (flag && hasCorrectToolForDrops) { // CraftBukkit - Check if block should drop items // Paper - fix drops not preventing stats/food exhaustion
 +                        block.playerDestroy(this.level, this.player, pos, blockState1, blockEntity, itemStack, event.isDropItems(), false); // Paper - fix drops not preventing stats/food exhaustion
-                     }
- 
--                    return true;
++                    }
++
 +                    // return true; // CraftBukkit
 +                }
 +                // CraftBukkit start
@@ -291,7 +289,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
 +                this.level.captureDrops = null; // Paper - capture all item additions to the world; Remove this earlier so that we can actually drop stuff
 +                if (event.isDropItems()) {
 +                    org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockDropItemEvent(bblock, state, this.player, itemsToDrop); // Paper - capture all item additions to the world
-                 }
++                }
 +
 +                // Drop event experience
 +                if (flag) {
@@ -310,7 +308,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
              }
          }
      }
-@@ -307,15 +453,47 @@ public class ServerPlayerGameMode {
+@@ -323,15 +_,47 @@
          }
      }
  
@@ -360,7 +358,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
                  return InteractionResult.CONSUME;
              } else {
                  return InteractionResult.PASS;
-@@ -340,7 +518,7 @@ public class ServerPlayerGameMode {
+@@ -356,7 +_,7 @@
                  }
              }
  
@@ -369,7 +367,7 @@ index f64ee83992fa21976aa4e6050377b97a2c0a7ba2..b5378d6d73b6dab56bf664024f3f8249
                  UseOnContext useOnContext = new UseOnContext(player, hand, hitResult);
                  InteractionResult interactionResult1;
                  if (player.hasInfiniteMaterials()) {
-@@ -357,6 +535,11 @@ public class ServerPlayerGameMode {
+@@ -373,6 +_,11 @@
  
                  return interactionResult1;
              } else {

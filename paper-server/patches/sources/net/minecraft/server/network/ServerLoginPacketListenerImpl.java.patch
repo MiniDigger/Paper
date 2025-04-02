@@ -1,14 +1,6 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/server/network/ServerLoginPacketListenerImpl.java b/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
-index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33bc8aa5309 100644
 --- a/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
-@@ -44,9 +44,17 @@ import net.minecraft.util.StringUtil;
+@@ -45,9 +_,17 @@
  import org.apache.commons.lang3.Validate;
  import org.slf4j.Logger;
  
@@ -26,8 +18,8 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
 +    private static final java.util.concurrent.ExecutorService authenticatorPool = java.util.concurrent.Executors.newCachedThreadPool(new com.google.common.util.concurrent.ThreadFactoryBuilder().setNameFormat("User Authenticator #%d").setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER)).build()); // Paper - Cache authenticator threads
      private static final int MAX_TICKS_BEFORE_LOGIN = 600;
      private final byte[] challenge;
-     final MinecraftServer server;
-@@ -59,6 +67,9 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+     final TheGame theGame;
+@@ -60,6 +_,9 @@
      public GameProfile authenticatedProfile;
      private final String serverId = "";
      private final boolean transferred;
@@ -35,10 +27,10 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
 +    public boolean iKnowThisMayNotBeTheBestIdeaButPleaseDisableUsernameValidation = false; // Paper - username validation overriding
 +    private int velocityLoginMessageId = -1; // Paper - Add Velocity IP Forwarding Support
  
-     public ServerLoginPacketListenerImpl(MinecraftServer server, Connection connection, boolean transferred) {
-         this.server = server;
-@@ -67,11 +78,48 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
-         this.transferred = transferred;
+     public ServerLoginPacketListenerImpl(TheGame theGame, Connection connection, boolean flag) {
+         this.theGame = theGame;
+@@ -68,11 +_,48 @@
+         this.transferred = flag;
      }
  
 +    // CraftBukkit start
@@ -75,18 +67,19 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
          if (this.state == ServerLoginPacketListenerImpl.State.VERIFYING) {
 +            if (this.connection.isConnected()) { // Paper - prevent logins to be processed even though disconnect was called
              this.verifyLoginAndFinishConnectionSetup(Objects.requireNonNull(this.authenticatedProfile));
+-        }
 +            } // Paper - prevent logins to be processed even though disconnect was called
 +        }
 +
 +        // CraftBukkit start
 +        if (this.state == ServerLoginPacketListenerImpl.State.WAITING_FOR_COOKIES && !this.player.getBukkitEntity().isAwaitingCookies()) {
 +            this.postCookies(this.authenticatedProfile);
-         }
++        }
 +        // CraftBukkit end
  
          if (this.state == ServerLoginPacketListenerImpl.State.WAITING_FOR_DUPE_DISCONNECT
              && !this.isPlayerAlreadyInWorld(Objects.requireNonNull(this.authenticatedProfile))) {
-@@ -83,6 +131,13 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+@@ -84,6 +_,13 @@
          }
      }
  
@@ -100,7 +93,7 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
      @Override
      public boolean isAcceptingMessages() {
          return this.connection.isConnected();
-@@ -115,7 +170,13 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+@@ -116,7 +_,13 @@
      @Override
      public void handleHello(ServerboundHelloPacket packet) {
          Validate.validState(this.state == ServerLoginPacketListenerImpl.State.HELLO, "Unexpected hello packet");
@@ -113,11 +106,11 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
 +        }
 +        // Paper end - Validate usernames
          this.requestedUsername = packet.name();
-         GameProfile singleplayerProfile = this.server.getSingleplayerProfile();
-         if (singleplayerProfile != null && this.requestedUsername.equalsIgnoreCase(singleplayerProfile.getName())) {
-@@ -125,7 +186,32 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+         MinecraftServer minecraftServer = this.theGame.server();
+         GameProfile singleplayerProfile = minecraftServer.getSingleplayerProfile();
+@@ -127,7 +_,32 @@
                  this.state = ServerLoginPacketListenerImpl.State.KEY;
-                 this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic().getEncoded(), this.challenge, true));
+                 this.connection.send(new ClientboundHelloPacket("", minecraftServer.getKeyPair().getPublic().getEncoded(), this.challenge, true));
              } else {
 -                this.startClientVerification(UUIDUtil.createOfflineProfile(this.requestedUsername));
 +                // Paper start - Add Velocity IP Forwarding Support
@@ -149,10 +142,10 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
              }
          }
      }
-@@ -137,9 +223,23 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+@@ -139,9 +_,23 @@
  
      private void verifyLoginAndFinishConnectionSetup(GameProfile profile) {
-         PlayerList playerList = this.server.getPlayerList();
+         PlayerList playerList = this.theGame.playerList();
 -        Component component = playerList.canPlayerLogin(this.connection.getRemoteAddress(), profile);
 -        if (component != null) {
 -            this.disconnect(component);
@@ -168,15 +161,15 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
 +    }
 +
 +    private void postCookies(GameProfile profile) {
-+        PlayerList playerList = this.server.getPlayerList();
++        PlayerList playerList = this.theGame.playerList();
 +
 +        if (this.player == null) {
 +            // this.disconnect(component);
 +            // CraftBukkit end
          } else {
-             if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
-                 this.connection
-@@ -149,7 +249,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+             int compressionThreshold = this.theGame.server().getCompressionThreshold();
+             if (compressionThreshold >= 0 && !this.connection.isMemoryConnection()) {
+@@ -152,7 +_,7 @@
                      );
              }
  
@@ -185,7 +178,7 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
              if (flag) {
                  this.state = ServerLoginPacketListenerImpl.State.WAITING_FOR_DUPE_DISCONNECT;
              } else {
-@@ -184,7 +284,8 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+@@ -187,7 +_,8 @@
              throw new IllegalStateException("Protocol error", var7);
          }
  
@@ -195,8 +188,8 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
              @Override
              public void run() {
                  String string1 = Objects.requireNonNull(ServerLoginPacketListenerImpl.this.requestedUsername, "Player name not initialized");
-@@ -195,11 +296,17 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
-                         .hasJoinedServer(string1, string, this.getAddress());
+@@ -197,11 +_,17 @@
+                     ProfileResult profileResult = minecraftServer.getSessionService().hasJoinedServer(string1, string, this.getAddress());
                      if (profileResult != null) {
                          GameProfile gameProfile = profileResult.profile();
 +                        // CraftBukkit start - fire PlayerPreLoginEvent
@@ -207,16 +200,16 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
 +                        // CraftBukkit end
                          ServerLoginPacketListenerImpl.LOGGER.info("UUID of player {} is {}", gameProfile.getName(), gameProfile.getId());
                          ServerLoginPacketListenerImpl.this.startClientVerification(gameProfile);
-                     } else if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
+                     } else if (minecraftServer.isSingleplayer()) {
                          ServerLoginPacketListenerImpl.LOGGER.warn("Failed to verify username but will let them in anyway!");
 -                        ServerLoginPacketListenerImpl.this.startClientVerification(UUIDUtil.createOfflineProfile(string1));
 +                        ServerLoginPacketListenerImpl.this.startClientVerification(ServerLoginPacketListenerImpl.this.createOfflineProfile(string1)); // Spigot
                      } else {
                          ServerLoginPacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.unverified_username"));
                          ServerLoginPacketListenerImpl.LOGGER.error("Username '{}' tried to join with an invalid session", string1);
-@@ -207,11 +314,16 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
-                 } catch (AuthenticationUnavailableException var4) {
-                     if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
+@@ -209,11 +_,16 @@
+                 } catch (AuthenticationUnavailableException var5) {
+                     if (minecraftServer.isSingleplayer()) {
                          ServerLoginPacketListenerImpl.LOGGER.warn("Authentication servers are down but will let them in anyway!");
 -                        ServerLoginPacketListenerImpl.this.startClientVerification(UUIDUtil.createOfflineProfile(string1));
 +                        ServerLoginPacketListenerImpl.this.startClientVerification(ServerLoginPacketListenerImpl.this.createOfflineProfile(string1)); // Spigot
@@ -233,13 +226,14 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
                  }
              }
  
-@@ -222,24 +334,120 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+@@ -224,24 +_,120 @@
                      ? ((InetSocketAddress)remoteAddress).getAddress()
                      : null;
              }
 -        };
 -        thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 -        thread.start();
+-    }
 +        });
 +        // Paper end - Cache authenticator threads
 +    }
@@ -292,7 +286,7 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
 +            }
 +        }
 +        return gameprofile; // Paper - Add more fields to AsyncPlayerPreLoginEvent
-     }
++    }
 +    // CraftBukkit end
  
      @Override
@@ -351,14 +345,14 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
          this.connection.setupOutboundProtocol(ConfigurationProtocols.CLIENTBOUND);
          CommonListenerCookie commonListenerCookie = CommonListenerCookie.createInitial(Objects.requireNonNull(this.authenticatedProfile), this.transferred);
          ServerConfigurationPacketListenerImpl serverConfigurationPacketListenerImpl = new ServerConfigurationPacketListenerImpl(
--            this.server, this.connection, commonListenerCookie
-+            this.server, this.connection, commonListenerCookie, this.player // CraftBukkit
+-            this.theGame, this.connection, commonListenerCookie
++            this.theGame, this.connection, commonListenerCookie, this.player // CraftBukkit
          );
 +
          this.connection.setupInboundProtocol(ConfigurationProtocols.SERVERBOUND, serverConfigurationPacketListenerImpl);
          serverConfigurationPacketListenerImpl.startConfiguration();
          this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
-@@ -252,15 +460,44 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
+@@ -254,8 +_,36 @@
  
      @Override
      public void handleCookieResponse(ServerboundCookieResponsePacket packet) {
@@ -370,7 +364,7 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
 +        // CraftBukkit end
          this.disconnect(ServerCommonPacketListenerImpl.DISCONNECT_UNEXPECTED_QUERY);
      }
- 
++
 +    // Spigot start
 +    protected GameProfile createOfflineProfile(String s) {
 +        java.util.UUID uuid;
@@ -392,10 +386,10 @@ index 65a9696b651562dbd1516725abcb1ad097689edd..5d48487568994860c153351ad4c6c33b
 +        return gameProfile;
 +    }
 +    // Spigot end
-+
+ 
      public static enum State {
          HELLO,
-         KEY,
+@@ -263,6 +_,7 @@
          AUTHENTICATING,
          NEGOTIATING,
          VERIFYING,

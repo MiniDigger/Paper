@@ -1,14 +1,6 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/server/Main.java b/net/minecraft/server/Main.java
-index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b82321f2feb25 100644
 --- a/net/minecraft/server/Main.java
 +++ b/net/minecraft/server/Main.java
-@@ -67,8 +67,10 @@ public class Main {
+@@ -68,8 +_,10 @@
          reason = "System.out needed before bootstrap"
      )
      @DontObfuscate
@@ -20,7 +12,7 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
          OptionParser optionParser = new OptionParser();
          OptionSpec<Void> optionSpec = optionParser.accepts("nogui");
          OptionSpec<Void> optionSpec1 = optionParser.accepts("initSettings", "Initializes 'server.properties' and 'eula.txt', then quits");
-@@ -93,41 +95,94 @@ public class Main {
+@@ -94,41 +_,94 @@
                  optionParser.printHelpOn(System.err);
                  return;
              }
@@ -124,7 +116,7 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
              Dynamic<?> dataTag;
              if (levelStorageAccess.hasWorldData()) {
                  LevelSummary summary;
-@@ -169,12 +224,33 @@ public class Main {
+@@ -170,13 +_,34 @@
              }
  
              Dynamic<?> dynamic = dataTag;
@@ -135,6 +127,7 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
              }
  
              PackRepository packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
+             WorldLoader.InitConfig initConfig = loadOrCreateConfig(dedicatedServerSettings.getProperties(), dynamic, hasOptionSpec, packRepository);
 +            // CraftBukkit start
 +            File bukkitDataPackFolder = new File(levelStorageAccess.getLevelPath(net.minecraft.world.level.storage.LevelResource.DATAPACK_DIR).toFile(), "bukkit");
 +            if (!bukkitDataPackFolder.exists()) {
@@ -159,7 +152,7 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
  
              WorldStem worldStem;
              try {
-@@ -183,6 +259,7 @@ public class Main {
+@@ -184,6 +_,7 @@
                          executor -> WorldLoader.load(
                              initConfig,
                              context -> {
@@ -167,7 +160,7 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
                                  Registry<LevelStem> registry = context.datapackDimensions().lookupOrThrow(Registries.LEVEL_STEM);
                                  if (dynamic != null) {
                                      LevelDataAndDimensions levelDataAndDimensions = LevelStorageSource.getLevelDataAndDimensions(
-@@ -196,7 +273,7 @@ public class Main {
+@@ -197,7 +_,7 @@
                                      LevelSettings levelSettings;
                                      WorldOptions worldOptions;
                                      WorldDimensions worldDimensions;
@@ -176,7 +169,7 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
                                          levelSettings = MinecraftServer.DEMO_SETTINGS;
                                          worldOptions = WorldOptions.DEMO_OPTIONS;
                                          worldDimensions = WorldPresets.createNormalWorldDimensions(context.datapackWorldgen());
-@@ -211,7 +288,7 @@ public class Main {
+@@ -212,7 +_,7 @@
                                              new GameRules(context.dataConfiguration().enabledFeatures()),
                                              context.dataConfiguration()
                                          );
@@ -185,7 +178,7 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
                                          worldDimensions = properties.createDimensions(context.datapackWorldgen());
                                      }
  
-@@ -237,6 +314,7 @@ public class Main {
+@@ -238,6 +_,7 @@
                  return;
              }
  
@@ -193,23 +186,22 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
              RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
              WorldData worldData = worldStem.worldData();
              boolean hasOptionSpec1 = optionSet.has(optionSpec6);
-@@ -245,9 +323,13 @@ public class Main {
+@@ -246,6 +_,7 @@
              }
  
              levelStorageAccess.saveDataTag(frozen, worldData);
 +            */
              final DedicatedServer dedicatedServer = MinecraftServer.spin(
+                 packRepository,
+                 worldStem,
+@@ -253,19 +_,39 @@
+                 LoggerChunkProgressListener::createFromGameruleRadius,
                  thread1 -> {
                      DedicatedServer dedicatedServer1 = new DedicatedServer(
 +                        // CraftBukkit start
 +                        optionSet,
 +                        worldLoader.get(),
-                         thread1,
-                         levelStorageAccess,
-                         packRepository,
-@@ -257,17 +339,34 @@ public class Main {
-                         services,
-                         LoggerChunkProgressListener::createFromGameruleRadius
+                         thread1, levelStorageAccess, dedicatedServerSettings, DataFixers.getDataFixer(), services
                      );
 +                    /*
                      dedicatedServer1.setPort(optionSet.valueOf(optionSpec11));
@@ -244,15 +236,15 @@ index 5cd0ef6d6dfab24420178cf238fcf4b0b2e6c14b..58be6e1d1607a3af5e28f851718b8232
              Thread thread = new Thread("Server Shutdown Thread") {
                  @Override
                  public void run() {
-@@ -276,6 +375,7 @@ public class Main {
+@@ -274,6 +_,7 @@
              };
              thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
              Runtime.getRuntime().addShutdownHook(thread);
 +            */ // CraftBukkit end
-         } catch (Exception var42) {
-             LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var42);
+         } catch (Exception var43) {
+             LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var43);
          }
-@@ -317,7 +417,7 @@ public class Main {
+@@ -350,7 +_,7 @@
          RegistryAccess registryAccess,
          boolean recreateRegionFiles
      ) {

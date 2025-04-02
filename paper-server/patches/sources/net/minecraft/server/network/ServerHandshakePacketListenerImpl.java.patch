@@ -1,17 +1,9 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/server/network/ServerHandshakePacketListenerImpl.java b/net/minecraft/server/network/ServerHandshakePacketListenerImpl.java
-index 22d8ebffcd347051a917fcc2c994c38ddb713622..5677a1d1ca2fc5d179034e2747f334a708a7cc79 100644
 --- a/net/minecraft/server/network/ServerHandshakePacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerHandshakePacketListenerImpl.java
-@@ -14,9 +14,20 @@ import net.minecraft.server.MinecraftServer;
- 
+@@ -16,9 +_,20 @@
  public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketListener {
      private static final Component IGNORE_STATUS_REASON = Component.translatable("disconnect.ignoring_status_request");
+     private static final Component NO_GAME = Component.literal("We are not playing any games here");
 +    // Spigot start
 +    private static final com.google.gson.Gson gson = new com.google.gson.Gson();
 +    static final java.util.regex.Pattern HOST_PATTERN = java.util.regex.Pattern.compile("[0-9a-f\\.:]{0,45}");
@@ -29,7 +21,7 @@ index 22d8ebffcd347051a917fcc2c994c38ddb713622..5677a1d1ca2fc5d179034e2747f334a7
      public ServerHandshakePacketListenerImpl(MinecraftServer server, Connection connection) {
          this.server = server;
          this.connection = connection;
-@@ -24,6 +35,7 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
+@@ -26,6 +_,7 @@
  
      @Override
      public void handleIntention(ClientIntentionPacket packet) {
@@ -37,7 +29,7 @@ index 22d8ebffcd347051a917fcc2c994c38ddb713622..5677a1d1ca2fc5d179034e2747f334a7
          switch (packet.intention()) {
              case LOGIN:
                  this.beginLogin(packet, false);
-@@ -50,22 +62,117 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
+@@ -52,17 +_,53 @@
              default:
                  throw new UnsupportedOperationException("Invalid intention " + packet.intention());
          }
@@ -95,66 +87,70 @@ index 22d8ebffcd347051a917fcc2c994c38ddb713622..5677a1d1ca2fc5d179034e2747f334a7
  
              this.connection.send(new ClientboundLoginDisconnectPacket(component));
              this.connection.disconnect(component);
-         } else {
-             this.connection.setupInboundProtocol(LoginProtocols.SERVERBOUND, new ServerLoginPacketListenerImpl(this.server, this.connection, transferred));
-+            // Paper start - PlayerHandshakeEvent
-+            boolean proxyLogicEnabled = org.spigotmc.SpigotConfig.bungee;
-+            boolean handledByEvent = false;
-+            // Try and handle the handshake through the event
-+            if (com.destroystokyo.paper.event.player.PlayerHandshakeEvent.getHandlerList().getRegisteredListeners().length != 0) { // Hello? Can you hear me?
-+                java.net.SocketAddress socketAddress = this.connection.address;
-+                String hostnameOfRemote = socketAddress instanceof java.net.InetSocketAddress ? ((java.net.InetSocketAddress) socketAddress).getHostString() : java.net.InetAddress.getLoopbackAddress().getHostAddress();
-+                com.destroystokyo.paper.event.player.PlayerHandshakeEvent event = new com.destroystokyo.paper.event.player.PlayerHandshakeEvent(packet.hostName(), hostnameOfRemote, !proxyLogicEnabled);
-+                if (event.callEvent()) {
-+                    // If we've failed somehow, let the client know so and go no further.
-+                    if (event.isFailed()) {
-+                        Component message = io.papermc.paper.adventure.PaperAdventure.asVanilla(event.failMessage());
+@@ -73,7 +_,67 @@
+                 this.connection.disconnect(NO_GAME);
+             } else {
+                 this.connection.setupInboundProtocol(LoginProtocols.SERVERBOUND, new ServerLoginPacketListenerImpl(theGame, this.connection, transferred));
++                // Paper start - PlayerHandshakeEvent
++                boolean proxyLogicEnabled = org.spigotmc.SpigotConfig.bungee;
++                boolean handledByEvent = false;
++                // Try and handle the handshake through the event
++                if (com.destroystokyo.paper.event.player.PlayerHandshakeEvent.getHandlerList().getRegisteredListeners().length != 0) { // Hello? Can you hear me?
++                    java.net.SocketAddress socketAddress = this.connection.address;
++                    String hostnameOfRemote = socketAddress instanceof java.net.InetSocketAddress ? ((java.net.InetSocketAddress) socketAddress).getHostString() : java.net.InetAddress.getLoopbackAddress().getHostAddress();
++                    com.destroystokyo.paper.event.player.PlayerHandshakeEvent event = new com.destroystokyo.paper.event.player.PlayerHandshakeEvent(packet.hostName(), hostnameOfRemote, !proxyLogicEnabled);
++                    if (event.callEvent()) {
++                        // If we've failed somehow, let the client know so and go no further.
++                        if (event.isFailed()) {
++                            Component message = io.papermc.paper.adventure.PaperAdventure.asVanilla(event.failMessage());
++                            this.connection.send(new ClientboundLoginDisconnectPacket(message));
++                            this.connection.disconnect(message);
++                            return;
++                        }
++
++                        if (event.getServerHostname() != null) {
++                            // change hostname
++                            packet = new ClientIntentionPacket(
++                                packet.protocolVersion(),
++                                event.getServerHostname(),
++                                packet.port(),
++                                packet.intention()
++                            );
++                        }
++                        if (event.getSocketAddressHostname() != null)
++                            this.connection.address = new java.net.InetSocketAddress(event.getSocketAddressHostname(), socketAddress instanceof java.net.InetSocketAddress ? ((java.net.InetSocketAddress) socketAddress).getPort() : 0);
++                        this.connection.spoofedUUID = event.getUniqueId();
++                        this.connection.spoofedProfile = gson.fromJson(event.getPropertiesJson(), com.mojang.authlib.properties.Property[].class);
++                        handledByEvent = true; // Hooray, we did it!
++                    }
++                }
++                // Paper end
++                // Spigot start
++                String[] split = packet.hostName().split("\00");
++                if (!handledByEvent && proxyLogicEnabled) { // Paper
++                    // if (org.spigotmc.SpigotConfig.bungee) { // Paper - comment out, we check above!
++                    if ((split.length == 3 || split.length == 4) && (ServerHandshakePacketListenerImpl.BYPASS_HOSTCHECK || ServerHandshakePacketListenerImpl.HOST_PATTERN.matcher(split[1]).matches())) { // Paper - Add bypass host check
++                        // Paper start - Unix domain socket support
++                        java.net.SocketAddress socketAddress = this.connection.getRemoteAddress();
++                        this.connection.hostname = split[0];
++                        this.connection.address = new java.net.InetSocketAddress(split[1], socketAddress instanceof java.net.InetSocketAddress ? ((java.net.InetSocketAddress) socketAddress).getPort() : 0);
++                        // Paper end - Unix domain socket support
++                        this.connection.spoofedUUID = com.mojang.util.UndashedUuid.fromStringLenient(split[2]);
++                    } else {
++                        Component message = Component.literal("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
 +                        this.connection.send(new ClientboundLoginDisconnectPacket(message));
 +                        this.connection.disconnect(message);
 +                        return;
 +                    }
-+
-+                    if (event.getServerHostname() != null) {
-+                        // change hostname
-+                        packet = new ClientIntentionPacket(
-+                            packet.protocolVersion(),
-+                            event.getServerHostname(),
-+                            packet.port(),
-+                            packet.intention()
-+                        );
++                    if (split.length == 4) {
++                        this.connection.spoofedProfile = ServerHandshakePacketListenerImpl.gson.fromJson(split[3], com.mojang.authlib.properties.Property[].class);
 +                    }
-+                    if (event.getSocketAddressHostname() != null) this.connection.address = new java.net.InetSocketAddress(event.getSocketAddressHostname(), socketAddress instanceof java.net.InetSocketAddress ? ((java.net.InetSocketAddress) socketAddress).getPort() : 0);
-+                    this.connection.spoofedUUID = event.getUniqueId();
-+                    this.connection.spoofedProfile = gson.fromJson(event.getPropertiesJson(), com.mojang.authlib.properties.Property[].class);
-+                    handledByEvent = true; // Hooray, we did it!
-+                }
-+            }
-+            // Paper end
-+            // Spigot start
-+            String[] split = packet.hostName().split("\00");
-+            if (!handledByEvent && proxyLogicEnabled) { // Paper
-+                // if (org.spigotmc.SpigotConfig.bungee) { // Paper - comment out, we check above!
-+                if ((split.length == 3 || split.length == 4) && (ServerHandshakePacketListenerImpl.BYPASS_HOSTCHECK || ServerHandshakePacketListenerImpl.HOST_PATTERN.matcher(split[1]).matches())) { // Paper - Add bypass host check
-+                    // Paper start - Unix domain socket support
-+                    java.net.SocketAddress socketAddress = this.connection.getRemoteAddress();
-+                    this.connection.hostname = split[0];
-+                    this.connection.address = new java.net.InetSocketAddress(split[1], socketAddress instanceof java.net.InetSocketAddress ? ((java.net.InetSocketAddress) socketAddress).getPort() : 0);
-+                    // Paper end - Unix domain socket support
-+                    this.connection.spoofedUUID = com.mojang.util.UndashedUuid.fromStringLenient( split[2] );
-+                } else {
-+                    Component message = Component.literal("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
++                } else if ((split.length == 3 || split.length == 4) && (ServerHandshakePacketListenerImpl.HOST_PATTERN.matcher(split[1]).matches())) {
++                    Component message = Component.literal("Unknown data in login hostname, did you forget to enable BungeeCord in spigot.yml?");
 +                    this.connection.send(new ClientboundLoginDisconnectPacket(message));
 +                    this.connection.disconnect(message);
-+                    return;
 +                }
-+                if (split.length == 4) {
-+                    this.connection.spoofedProfile = ServerHandshakePacketListenerImpl.gson.fromJson(split[3], com.mojang.authlib.properties.Property[].class);
-+                }
-+            } else if ((split.length == 3 || split.length == 4) && (ServerHandshakePacketListenerImpl.HOST_PATTERN.matcher(split[1]).matches())) {
-+                Component message = Component.literal("Unknown data in login hostname, did you forget to enable BungeeCord in spigot.yml?");
-+                this.connection.send(new ClientboundLoginDisconnectPacket(message));
-+                this.connection.disconnect(message);
-+            }
+             }
 +            // Spigot end
          }
      }
