@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/TheGame.java
++++ b/net/minecraft/server/TheGame.java
+@@ -132,7 +_,7 @@
+         this.registries = worldStem.registries();
+         this.worldData = worldStem.worldData();
+         this.playerList = function.apply(this);
+-        this.scoreboard = new ServerScoreboard(this.playerList::broadcastAll);
++        this.scoreboard = new ServerScoreboard(this); // Paper - use theGame directly
+         if (!this.registries.compositeAccess().lookupOrThrow(Registries.LEVEL_STEM).containsKey(LevelStem.OVERWORLD)) {
+             throw new IllegalStateException("Missing Overworld dimension data");
+         } else {

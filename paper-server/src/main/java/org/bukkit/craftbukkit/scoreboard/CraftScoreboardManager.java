@@ -40,7 +40,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     @Override
     public CraftScoreboard getNewScoreboard() {
         org.spigotmc.AsyncCatcher.catchOp("scoreboard creation"); // Spigot
-        CraftScoreboard scoreboard = new CraftScoreboard(new ServerScoreboard(this.server));
+        CraftScoreboard scoreboard = new CraftScoreboard(new ServerScoreboard(this.server.theGame()));
         if (io.papermc.paper.configuration.GlobalConfiguration.get().scoreboards.trackPluginScoreboards) {
             scoreboard.registeredGlobally = true;
             this.scoreboards.add(scoreboard);
