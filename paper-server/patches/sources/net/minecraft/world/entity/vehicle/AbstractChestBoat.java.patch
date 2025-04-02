@@ -34,7 +34,7 @@
 +        if (this.lootTable != null && player.isSpectator()) { // Paper - LootTable API (TODO spectators can open chests that aren't ready to be re-generated but this doesn't support that)
              return null;
          } else {
-             this.unpackLootTable(playerInventory.player);
+             this.unpackLootTable(playerInventory.getPlayer());
 @@ -198,4 +_,58 @@
      public void stopOpen(Player player) {
          this.level().gameEvent(GameEvent.CONTAINER_CLOSE, this.position(), GameEvent.Context.of(player));

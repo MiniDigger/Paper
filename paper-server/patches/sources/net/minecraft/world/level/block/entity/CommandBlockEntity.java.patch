@@ -22,4 +22,4 @@
 +                this.getLevel().paperConfig().commandBlocks.permissionsLevel, // Paper - configurable command block perm level
                  this.getName().getString(),
                  this.getName(),
-                 this.getLevel().getServer(),
+                 this.getLevel().theGame(),

@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/item/component/Consumable.java
 +++ b/net/minecraft/world/item/component/Consumable.java
-@@ -84,13 +_,35 @@
+@@ -88,13 +_,35 @@
  
          stack.getAllOfType(ConsumableListener.class).forEach(consumableListener -> consumableListener.onConsume(level, entity, stack, this));
          if (!level.isClientSide) {

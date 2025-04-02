@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/monster/piglin/Piglin.java
 +++ b/net/minecraft/world/entity/monster/piglin/Piglin.java
-@@ -124,6 +_,12 @@
+@@ -125,6 +_,12 @@
          MemoryModuleType.ATE_RECENTLY,
          MemoryModuleType.NEAREST_REPELLENT
      );
@@ -13,7 +13,7 @@
  
      public Piglin(EntityType<? extends AbstractPiglin> entityType, Level level) {
          super(entityType, level);
-@@ -136,6 +_,10 @@
+@@ -137,6 +_,10 @@
          compound.putBoolean("IsBaby", this.isBaby());
          compound.putBoolean("CannotHunt", this.cannotHunt);
          this.writeInventoryToTag(compound, this.registryAccess());
@@ -24,7 +24,7 @@
      }
  
      @Override
-@@ -144,6 +_,10 @@
+@@ -145,6 +_,10 @@
          this.setBaby(compound.getBooleanOr("IsBaby", false));
          this.setCannotHunt(compound.getBooleanOr("CannotHunt", false));
          this.readInventoryFromTag(compound, this.registryAccess());
@@ -35,7 +35,7 @@
      }
  
      @VisibleForDebug
-@@ -321,7 +_,9 @@
+@@ -324,7 +_,9 @@
      @Override
      protected void finishConversion(ServerLevel serverLevel) {
          PiglinAi.cancelAdmiring(serverLevel, this);
@@ -45,7 +45,7 @@
          super.finishConversion(serverLevel);
      }
  
-@@ -397,7 +_,7 @@
+@@ -400,7 +_,7 @@
      }
  
      protected void holdInOffHand(ItemStack stack) {
@@ -54,7 +54,7 @@
              this.setItemSlot(EquipmentSlot.OFFHAND, stack);
              this.setGuaranteedDrop(EquipmentSlot.OFFHAND);
          } else {
-@@ -422,15 +_,15 @@
+@@ -425,15 +_,15 @@
              return false;
          } else {
              TagKey<Item> preferredWeaponType = this.getPreferredWeaponType();

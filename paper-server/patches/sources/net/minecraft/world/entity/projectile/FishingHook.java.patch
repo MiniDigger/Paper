@@ -147,7 +147,7 @@
 +    public int retrieve(ItemStack stack, net.minecraft.world.InteractionHand hand) {
 +        // Paper end - Add hand parameter to PlayerFishEvent
          Player playerOwner = this.getPlayerOwner();
-         if (!this.level().isClientSide && playerOwner != null && !this.shouldStopFishing(playerOwner)) {
+         if (this.level() instanceof ServerLevel serverLevel && playerOwner != null && !this.shouldStopFishing(playerOwner)) {
              int i = 0;
              if (this.hookedIn != null) {
 +                // CraftBukkit start

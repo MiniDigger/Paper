@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/CropBlock.java
 +++ b/net/minecraft/world/level/block/CropBlock.java
-@@ -80,8 +_,25 @@
+@@ -84,8 +_,25 @@
              int age = this.getAge(state);
              if (age < this.getMaxAge()) {
                  float growthSpeed = getGrowthSpeed(this, level, pos);
@@ -28,7 +28,7 @@
                  }
              }
          }
-@@ -89,7 +_,7 @@
+@@ -93,7 +_,7 @@
  
      public void growCrops(Level level, BlockPos pos, BlockState state) {
          int min = Math.min(this.getMaxAge(), this.getAge(state) + this.getBonemealAgeIncrease(level));
@@ -37,7 +37,7 @@
      }
  
      protected int getBonemealAgeIncrease(Level level) {
-@@ -151,7 +_,8 @@
+@@ -155,7 +_,8 @@
  
      @Override
      protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier) {

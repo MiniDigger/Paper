@@ -1,0 +1,28 @@
+From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
+From: File <noreply+automated@papermc.io>
+Date: Sun, 20 Apr 1997 15:37:42 +0200
+Subject: [PATCH] paper File Patches
+
+
+diff --git a/net/minecraft/util/worldupdate/WorldUpgrader.java b/net/minecraft/util/worldupdate/WorldUpgrader.java
+index 7e85a12950ee2cdb80c4cd331fed22de3a18b7a4..559bd4eef7174b04f5aa71b982ba34cbace8da8a 100644
+--- a/net/minecraft/util/worldupdate/WorldUpgrader.java
++++ b/net/minecraft/util/worldupdate/WorldUpgrader.java
+@@ -87,7 +87,7 @@ public class WorldUpgrader implements AutoCloseable {
+         boolean recreateRegionFiles
+     ) {
+         this.dimensions = registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
+-        this.levels = this.dimensions.registryKeySet().stream().map(Registries::levelStemToLevel).collect(Collectors.toUnmodifiableSet());
++        this.levels = java.util.stream.Stream.of(levelStorage.dimensionType).map(Registries::levelStemToLevel).collect(Collectors.toUnmodifiableSet()); // CraftBukkit
+         this.eraseCache = eraseCache;
+         this.dataFixer = dataFixer;
+         this.levelStorage = levelStorage;
+@@ -369,7 +369,7 @@ public class WorldUpgrader implements AutoCloseable {
+                 int version = ChunkStorage.getVersion(compoundTag);
+                 ChunkGenerator chunkGenerator = WorldUpgrader.this.dimensions.getValueOrThrow(Registries.levelToLevelStem(dimension)).generator();
+                 CompoundTag compoundTag1 = chunkStorage.upgradeChunkTag(
+-                    dimension, () -> WorldUpgrader.this.overworldDataStorage, compoundTag, chunkGenerator.getTypeNameForDataFixer()
++                    Registries.levelToLevelStem(dimension), () -> WorldUpgrader.this.overworldDataStorage, compoundTag, chunkGenerator.getTypeNameForDataFixer(), chunkPos, null // CraftBukkit
+                 );
+                 ChunkPos chunkPos1 = new ChunkPos(compoundTag1.getIntOr("xPos", 0), compoundTag1.getIntOr("zPos", 0));
+                 if (!chunkPos1.equals(chunkPos)) {

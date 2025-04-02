@@ -1,7 +1,7 @@
 --- a/net/minecraft/world/entity/player/Inventory.java
 +++ b/net/minecraft/world/entity/player/Inventory.java
-@@ -49,6 +_,66 @@
-     public final Player player;
+@@ -51,6 +_,66 @@
+     private final Player player;
      public final EntityEquipment equipment;
      private int timesChanged;
 +    // CraftBukkit start - add fields and methods
@@ -67,7 +67,7 @@
  
      public Inventory(Player player, EntityEquipment equipment) {
          this.player = player;
-@@ -85,10 +_,39 @@
+@@ -87,10 +_,39 @@
  
      private boolean hasRemainingSpaceForItem(ItemStack destination, ItemStack origin) {
          return !destination.isEmpty()
@@ -109,8 +109,8 @@
 +    // CraftBukkit end
  
      public int getFreeSlot() {
-         for (int i = 0; i < this.items.size(); i++) {
-@@ -100,8 +_,10 @@
+         int i = 9;
+@@ -115,8 +_,10 @@
          return -1;
      }
  
@@ -123,7 +123,7 @@
          if (!this.items.get(this.selected).isEmpty()) {
              int freeSlot = this.getFreeSlot();
              if (freeSlot != -1) {
-@@ -112,8 +_,10 @@
+@@ -127,8 +_,10 @@
          this.items.set(this.selected, stack);
      }
  
