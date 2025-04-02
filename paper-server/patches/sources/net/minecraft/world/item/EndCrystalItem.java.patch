@@ -1,14 +1,6 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/world/item/EndCrystalItem.java b/net/minecraft/world/item/EndCrystalItem.java
-index d88ebe9eda2db830989cf638a8b88075221167a5..05ec512839898f96d9769bb0d00f6ba11dda0c4b 100644
 --- a/net/minecraft/world/item/EndCrystalItem.java
 +++ b/net/minecraft/world/item/EndCrystalItem.java
-@@ -27,7 +27,7 @@ public class EndCrystalItem extends Item {
+@@ -26,7 +_,7 @@
          if (!blockState.is(Blocks.OBSIDIAN) && !blockState.is(Blocks.BEDROCK)) {
              return InteractionResult.FAIL;
          } else {
@@ -17,7 +9,7 @@ index d88ebe9eda2db830989cf638a8b88075221167a5..05ec512839898f96d9769bb0d00f6ba1
              if (!level.isEmptyBlock(blockPos)) {
                  return InteractionResult.FAIL;
              } else {
-@@ -41,11 +41,17 @@ public class EndCrystalItem extends Item {
+@@ -40,6 +_,12 @@
                      if (level instanceof ServerLevel) {
                          EndCrystal endCrystal = new EndCrystal(level, d + 0.5, d1, d2 + 0.5);
                          endCrystal.setShowBottom(false);
@@ -29,10 +21,4 @@ index d88ebe9eda2db830989cf638a8b88075221167a5..05ec512839898f96d9769bb0d00f6ba1
 +                        // CraftBukkit end
                          level.addFreshEntity(endCrystal);
                          level.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
-                         EndDragonFight dragonFight = ((ServerLevel)level).getDragonFight();
-                         if (dragonFight != null) {
--                            dragonFight.tryRespawn();
-+                            dragonFight.tryRespawn(aboveBlockPos); // Paper - Perf: Do crystal-portal proximity check before entity lookup
-                         }
                      }
- 

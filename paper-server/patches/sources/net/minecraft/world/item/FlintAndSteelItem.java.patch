@@ -1,36 +1,57 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/world/item/FlintAndSteelItem.java b/net/minecraft/world/item/FlintAndSteelItem.java
-index c2b991206d1de34eb3c4170af07dda3f6ff4b687..3f81e3ff536f52bcf06d1f0006244c80bddf1902 100644
 --- a/net/minecraft/world/item/FlintAndSteelItem.java
 +++ b/net/minecraft/world/item/FlintAndSteelItem.java
-@@ -32,6 +32,12 @@ public class FlintAndSteelItem extends Item {
+@@ -25,10 +_,10 @@
+ 
+     @Override
+     public InteractionResult useOn(UseOnContext context) {
+-        return (InteractionResult)(ignite(context) ? InteractionResult.SUCCESS : InteractionResult.FAIL);
++        return ignite(context);
+     }
+ 
+-    public static boolean ignite(UseOnContext useOnContext) {
++    public static InteractionResult ignite(UseOnContext useOnContext) {
+         Player player = useOnContext.getPlayer();
+         Level level = useOnContext.getLevel();
+         BlockPos clickedPos = useOnContext.getClickedPos();
+@@ -36,6 +_,12 @@
          if (!CampfireBlock.canLight(blockState) && !CandleBlock.canLight(blockState) && !CandleCakeBlock.canLight(blockState)) {
-             BlockPos blockPos = clickedPos.relative(context.getClickedFace());
-             if (BaseFireBlock.canBePlacedAt(level, blockPos, context.getHorizontalDirection())) {
+             BlockPos blockPos = clickedPos.relative(useOnContext.getClickedFace());
+             if (BaseFireBlock.canBePlacedAt(level, blockPos, useOnContext.getHorizontalDirection())) {
 +                // CraftBukkit start - Store the clicked block
 +                if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(level, blockPos, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL, player).isCancelled()) {
-+                    context.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
++                    useOnContext.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(useOnContext.getHand()));
 +                    return InteractionResult.PASS;
 +                }
 +                // CraftBukkit end
                  level.playSound(player, blockPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
                  BlockState state = BaseFireBlock.getState(level, blockPos);
                  level.setBlock(blockPos, state, 11);
-@@ -47,6 +53,12 @@ public class FlintAndSteelItem extends Item {
-                 return InteractionResult.FAIL;
+@@ -46,11 +_,17 @@
+                     itemInHand.hurtAndBreak(1, player, LivingEntity.getSlotForHand(useOnContext.getHand()));
+                 }
+ 
+-                return true;
++                return InteractionResult.SUCCESS;
+             } else {
+-                return false;
++                return InteractionResult.FAIL;
              }
          } else {
 +            // CraftBukkit start - Store the clicked block
 +            if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockIgniteEvent(level, clickedPos, org.bukkit.event.block.BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL, player).isCancelled()) {
-+                context.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
++                useOnContext.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(useOnContext.getHand()));
 +                return InteractionResult.PASS;
 +            }
 +            // CraftBukkit end
              level.playSound(player, clickedPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
              level.setBlock(clickedPos, blockState.setValue(BlockStateProperties.LIT, true), 11);
              level.gameEvent(player, GameEvent.BLOCK_CHANGE, clickedPos);
+@@ -58,7 +_,7 @@
+                 useOnContext.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(useOnContext.getHand()));
+             }
+ 
+-            return true;
++            return InteractionResult.SUCCESS;
+         }
+     }
+ }

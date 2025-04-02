@@ -1,17 +1,10 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/world/entity/ExperienceOrb.java b/net/minecraft/world/entity/ExperienceOrb.java
-index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316bef10f405 100644
 --- a/net/minecraft/world/entity/ExperienceOrb.java
 +++ b/net/minecraft/world/entity/ExperienceOrb.java
-@@ -41,9 +41,54 @@ public class ExperienceOrb extends Entity {
+@@ -42,13 +_,59 @@
      @Nullable
      private Player followingPlayer;
      private final InterpolationHandler interpolation = new InterpolationHandler(this);
+-
 +    // Paper start
 +    @Nullable
 +    public java.util.UUID sourceEntityId;
@@ -24,7 +17,7 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
 +        if (expData.isEmpty()) {
 +            return;
 +        }
- 
++
 +        this.sourceEntityId = expData.read("source", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
 +        this.triggerEntityId = expData.read("trigger", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
 +        expData.getString("reason").ifPresent(reason -> {
@@ -47,23 +40,31 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
 +
 +    @Deprecated @io.papermc.paper.annotation.DoNotUse
      public ExperienceOrb(Level level, double x, double y, double z, int value) {
+-        this(level, new Vec3(x, y, z), Vec3.ZERO, value);
+-    }
+-
 +        this(level, x, y, z, value, null, null);
 +    }
 +
 +    public ExperienceOrb(Level level, double x, double y, double z, int value, @Nullable org.bukkit.entity.ExperienceOrb.SpawnReason reason, @Nullable Entity triggerId) {
-+        this(level, x, y, z, value, reason, triggerId, null);
++        this(level, new Vec3(x, y, z), net.minecraft.world.phys.Vec3.ZERO, value, reason, triggerId, null);
 +    }
 +
-+    public ExperienceOrb(Level level, double x, double y, double z, int value, @Nullable org.bukkit.entity.ExperienceOrb.SpawnReason reason, @Nullable Entity triggerId, @Nullable Entity sourceId) {
++    @Deprecated @io.papermc.paper.annotation.DoNotUse
+     public ExperienceOrb(Level level, Vec3 vec3, Vec3 vec31, int i) {
++        this(level, vec3, vec31, i, null, null, null);
++    }
++
++    public ExperienceOrb(Level level, Vec3 vec3, Vec3 vec31, int i, @Nullable org.bukkit.entity.ExperienceOrb.SpawnReason reason, @Nullable Entity triggerId, @Nullable Entity sourceId) {
          this(EntityType.EXPERIENCE_ORB, level);
 +        this.sourceEntityId = sourceId != null ? sourceId.getUUID() : null;
 +        this.triggerEntityId = triggerId != null ? triggerId.getUUID() : null;
 +        this.spawnReason = reason != null ? reason : org.bukkit.entity.ExperienceOrb.SpawnReason.UNKNOWN;
 +        // Paper end
-         this.setPos(x, y, z);
+         this.setPos(vec3);
          if (!this.level().isClientSide) {
              this.setYRot((float)(this.random.nextDouble() * 360.0));
-@@ -119,12 +164,13 @@ public class ExperienceOrb extends Entity {
+@@ -135,7 +_,7 @@
  
              this.age++;
              if (this.age >= 6000) {
@@ -72,13 +73,15 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
              }
          }
      }
+@@ -145,6 +_,7 @@
+     }
  
      private void followNearbyPlayer() {
 +        Player prevTarget = this.followingPlayer; // CraftBukkit - store old target
          if (this.followingPlayer == null || this.followingPlayer.isSpectator() || this.followingPlayer.distanceToSqr(this) > 64.0) {
              Player nearestPlayer = this.level().getNearestPlayer(this, 8.0);
              if (nearestPlayer != null && !nearestPlayer.isSpectator() && !nearestPlayer.isDeadOrDying()) {
-@@ -134,7 +180,24 @@ public class ExperienceOrb extends Entity {
+@@ -154,7 +_,24 @@
              }
          }
  
@@ -104,10 +107,11 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
              Vec3 vec3 = new Vec3(
                  this.followingPlayer.getX() - this.getX(),
                  this.followingPlayer.getY() + this.followingPlayer.getEyeHeight() / 2.0 - this.getY(),
-@@ -161,16 +224,27 @@ public class ExperienceOrb extends Entity {
+@@ -181,10 +_,24 @@
      }
  
      public static void award(ServerLevel level, Vec3 pos, int amount) {
+-        awardWithDirection(level, pos, Vec3.ZERO, amount);
 +        // Paper start - add reasons for orbs
 +        award(level, pos, amount, null, null, null);
 +    }
@@ -118,14 +122,18 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
 +
 +    public static void award(ServerLevel level, Vec3 pos, int amount, @Nullable org.bukkit.entity.ExperienceOrb.SpawnReason reason, @Nullable Entity triggerId, @Nullable Entity sourceId) {
 +        // Paper end - add reasons for orbs
-         while (amount > 0) {
-             int experienceValue = getExperienceValue(amount);
-             amount -= experienceValue;
-             if (!tryMergeToExisting(level, pos, experienceValue)) {
--                level.addFreshEntity(new ExperienceOrb(level, pos.x(), pos.y(), pos.z(), experienceValue));
-+                level.addFreshEntity(new ExperienceOrb(level, pos.x(), pos.y(), pos.z(), experienceValue, reason, triggerId, sourceId)); // Paper - add reason
-             }
-         }
++        awardWithDirection(level, pos, Vec3.ZERO, amount, reason, triggerId, sourceId);
+     }
+ 
+     public static void awardWithDirection(ServerLevel serverLevel, Vec3 vec3, Vec3 vec31, int i) {
++        awardWithDirection(serverLevel, vec3, vec31, i, null, null, null);
++    }
++
++    public static void awardWithDirection(ServerLevel serverLevel, Vec3 vec3, Vec3 vec31, int i, @Nullable org.bukkit.entity.ExperienceOrb.SpawnReason reason, @Nullable Entity triggerId, @Nullable Entity sourceId) {
+         while (i > 0) {
+             int experienceValue = getExperienceValue(i);
+             i -= experienceValue;
+@@ -195,6 +_,7 @@
      }
  
      private static boolean tryMergeToExisting(ServerLevel level, Vec3 pos, int amount) {
@@ -133,7 +141,7 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
          AABB aabb = AABB.ofSize(pos, 1.0, 1.0, 1.0);
          int randomInt = level.getRandom().nextInt(40);
          List<ExperienceOrb> entities = level.getEntities(EntityTypeTest.forClass(ExperienceOrb.class), aabb, orb -> canMerge(orb, randomInt, amount));
-@@ -193,9 +267,14 @@ public class ExperienceOrb extends Entity {
+@@ -217,9 +_,14 @@
      }
  
      private void merge(ExperienceOrb orb) {
@@ -149,7 +157,7 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
      }
  
      private void setUnderwaterMovement() {
-@@ -220,7 +299,7 @@ public class ExperienceOrb extends Entity {
+@@ -244,7 +_,7 @@
              this.markHurt();
              this.health = (int)(this.health - amount);
              if (this.health <= 0) {
@@ -158,7 +166,7 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
              }
  
              return true;
-@@ -231,32 +310,34 @@ public class ExperienceOrb extends Entity {
+@@ -255,33 +_,35 @@
      public void addAdditionalSaveData(CompoundTag compound) {
          compound.putShort("Health", (short)this.health);
          compound.putShort("Age", (short)this.age);
@@ -180,26 +188,27 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
  
      @Override
      public void playerTouch(Player entity) {
-         if (entity instanceof ServerPlayer serverPlayer) {
--            if (entity.takeXpDelay == 0) {
--                entity.takeXpDelay = 2;
-+            if (entity.takeXpDelay == 0 && new com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent(serverPlayer.getBukkitEntity(), (org.bukkit.entity.ExperienceOrb) this.getBukkitEntity()).callEvent()) { // Paper - PlayerPickupExperienceEvent
-+                entity.takeXpDelay = org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerXpCooldownEvent(entity, 2, org.bukkit.event.player.PlayerExpCooldownChangeEvent.ChangeReason.PICKUP_ORB).getNewCooldown(); // CraftBukkit - entityhuman.takeXpDelay = 2;
-                 entity.take(this, 1);
-                 int i = this.repairPlayerItems(serverPlayer, this.getValue());
-                 if (i > 0) {
--                    entity.giveExperiencePoints(i);
-+                    entity.giveExperiencePoints(org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerExpChangeEvent(entity, this).getAmount()); // CraftBukkit - this.value -> event.getAmount() // Paper - supply experience orb object
-                 }
+         if (this.isOfAge()) {
+             if (entity instanceof ServerPlayer serverPlayer && !serverPlayer.isRevisiting()) {
+-                if (entity.takeXpDelay == 0) {
+-                    entity.takeXpDelay = 2;
++                if (entity.takeXpDelay == 0 && new com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent(serverPlayer.getBukkitEntity(), (org.bukkit.entity.ExperienceOrb) this.getBukkitEntity()).callEvent()) { // Paper - PlayerPickupExperienceEvent
++                    entity.takeXpDelay = org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerXpCooldownEvent(entity, 2, org.bukkit.event.player.PlayerExpCooldownChangeEvent.ChangeReason.PICKUP_ORB).getNewCooldown(); // CraftBukkit - entityhuman.takeXpDelay = 2;
+                     entity.take(this, 1);
+                     int i = this.repairPlayerItems(serverPlayer, this.getValue());
+                     if (i > 0) {
+-                        entity.giveExperiencePoints(i);
++                        entity.giveExperiencePoints(org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerExpChangeEvent(entity, this).getAmount()); // CraftBukkit - this.value -> event.getAmount() // Paper - supply experience orb object
+                     }
  
-                 this.count--;
-                 if (this.count == 0) {
--                    this.discard();
-+                    this.discard(org.bukkit.event.entity.EntityRemoveEvent.Cause.PICKUP); // CraftBukkit - add Bukkit remove cause
+                     this.count--;
+                     if (this.count == 0) {
+-                        this.discard();
++                        this.discard(org.bukkit.event.entity.EntityRemoveEvent.Cause.PICKUP); // CraftBukkit - add Bukkit remove cause
+                     }
                  }
              }
-         }
-@@ -270,9 +351,19 @@ public class ExperienceOrb extends Entity {
+@@ -296,9 +_,19 @@
              ItemStack itemStack = randomItemWith.get().itemStack();
              int i = EnchantmentHelper.modifyDurabilityToRepairFromXp(player.serverLevel(), itemStack, value);
              int min = Math.min(i, itemStack.getDamageValue());
@@ -220,7 +229,7 @@ index 8f5d415aeed587c8477f0a0839104fdbd4be9724..a890d5d95ad6e8d9f729a7ce61bf316b
                  if (i1 > 0) {
                      return this.repairPlayerItems(player, i1);
                  }
-@@ -318,6 +409,24 @@ public class ExperienceOrb extends Entity {
+@@ -344,6 +_,24 @@
      }
  
      public static int getExperienceValue(int expValue) {
