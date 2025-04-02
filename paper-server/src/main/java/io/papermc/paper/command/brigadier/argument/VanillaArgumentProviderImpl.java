@@ -258,7 +258,7 @@ public class VanillaArgumentProviderImpl implements VanillaArgumentProvider {
         return this.wrap(DimensionArgument.dimension(), dimensionLocation -> {
             // based on DimensionArgument#getDimension
             final ResourceKey<Level> resourceKey = ResourceKey.create(Registries.DIMENSION, dimensionLocation);
-            final @Nullable ServerLevel serverLevel = MinecraftServer.getServer().getLevel(resourceKey);
+            final @Nullable ServerLevel serverLevel = MinecraftServer.getServer().theGame().getLevel(resourceKey);
             if (serverLevel == null) {
                 throw DimensionArgument.ERROR_INVALID_VALUE.create(dimensionLocation);
             } else {

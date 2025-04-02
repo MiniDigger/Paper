@@ -320,9 +320,9 @@ public class PaperConfigurations extends Configurations<GlobalConfiguration, Wor
 
     public void reloadConfigs(MinecraftServer server) {
         try {
-            this.initializeGlobalConfiguration(server.registryAccess(), reloader(this.globalConfigClass, GlobalConfiguration.get()));
-            this.initializeWorldDefaultsConfiguration(server.registryAccess());
-            for (ServerLevel level : server.getAllLevels()) {
+            this.initializeGlobalConfiguration(server.theGame().registryAccess(), reloader(this.globalConfigClass, GlobalConfiguration.get()));
+            this.initializeWorldDefaultsConfiguration(server.theGame().registryAccess());
+            for (ServerLevel level : server.theGame().getAllLevels()) {
                 this.createWorldConfig(createWorldContextMap(level), reloader(this.worldConfigClass, level.paperConfig()));
             }
         } catch (Exception ex) {
@@ -438,7 +438,7 @@ public class PaperConfigurations extends Configurations<GlobalConfiguration, Wor
         YamlConfiguration global = YamlConfiguration.loadConfiguration(this.globalFolder.resolve(this.globalConfigFileName).toFile());
         ConfigurationSection worlds = global.createSection("__________WORLDS__________");
         worlds.set("__defaults__", YamlConfiguration.loadConfiguration(this.globalFolder.resolve(this.defaultWorldConfigFileName).toFile()));
-        for (ServerLevel level : server.getAllLevels()) {
+        for (ServerLevel level : server.theGame().getAllLevels()) {
             worlds.set(level.getWorld().getName(), YamlConfiguration.loadConfiguration(getWorldConfigFile(level).toFile()));
         }
         return global;

@@ -111,7 +111,6 @@ public final class CraftBlockStates {
         register(BlockEntityType.DROPPER, CraftDropper.class, CraftDropper::new);
         register(BlockEntityType.ENCHANTING_TABLE, CraftEnchantingTable.class, CraftEnchantingTable::new);
         register(BlockEntityType.END_GATEWAY, CraftEndGateway.class, CraftEndGateway::new);
-        register(BlockEntityType.END_PORTAL, CraftEndPortal.class, CraftEndPortal::new);
         register(BlockEntityType.ENDER_CHEST, CraftEnderChest.class, CraftEnderChest::new);
         register(BlockEntityType.FURNACE, CraftFurnaceFurnace.class, CraftFurnaceFurnace::new);
         register(BlockEntityType.HANGING_SIGN, CraftHangingSign.class, CraftHangingSign::new);

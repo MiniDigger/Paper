@@ -44,7 +44,7 @@
      public TeleportTransition getPortalDestination(ServerLevel level, Entity entity, BlockPos pos) {
 -        ResourceKey<Level> resourceKey = level.dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER;
 +        // CraftBukkit start
-+        ResourceKey<Level> resourceKey = level.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.NETHER ? Level.OVERWORLD : Level.NETHER;
++        ResourceKey<Level> resourceKey = Level.OVERWORLD;
          ServerLevel level1 = level.theGame().getLevel(resourceKey);
 +        // Paper start - Add EntityPortalReadyEvent
 +        io.papermc.paper.event.entity.EntityPortalReadyEvent portalReadyEvent = new io.papermc.paper.event.entity.EntityPortalReadyEvent(entity.getBukkitEntity(), level1 == null ? null : level1.getWorld(), org.bukkit.PortalType.NETHER);
@@ -58,7 +58,7 @@
              return null;
          } else {
 -            boolean flag = level1.dimension() == Level.NETHER;
-+            boolean flag = level1.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.NETHER; // CraftBukkit
++            boolean flag = false; // CraftBukkit
              WorldBorder worldBorder = level1.getWorldBorder();
              double teleportationScale = DimensionType.getTeleportationScale(level.dimensionType(), level1.dimensionType());
              BlockPos blockPos = worldBorder.clampToBounds(entity.getX() * teleportationScale, entity.getY(), entity.getZ() * teleportationScale);

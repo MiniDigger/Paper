@@ -368,7 +368,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
 
         final ServerPlayer.RespawnConfig respawnConfig = data.read("respawn", ServerPlayer.RespawnConfig.CODEC).orElse(null);
         if (respawnConfig != null) {
-            final ServerLevel level = this.server.console.getLevel(respawnConfig.dimension());
+            final ServerLevel level = this.server.console.theGame().getLevel(respawnConfig.dimension());
             if (level != null) {
                 return CraftLocation.toBukkit(respawnConfig.pos(), level.getWorld(), respawnConfig.angle(), 0);
             }

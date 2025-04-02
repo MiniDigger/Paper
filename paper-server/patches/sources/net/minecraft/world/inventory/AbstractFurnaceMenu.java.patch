@@ -14,7 +14,7 @@
 +        }
 +
 +        org.bukkit.craftbukkit.inventory.CraftInventoryFurnace inventory = new org.bukkit.craftbukkit.inventory.CraftInventoryFurnace((net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity) this.container);
-+        this.view = new org.bukkit.craftbukkit.inventory.view.CraftFurnaceView(this.inventory.player.getBukkitEntity(), inventory, this);
++        this.view = new org.bukkit.craftbukkit.inventory.view.CraftFurnaceView(this.inventory.getPlayer().getBukkitEntity(), inventory, this);
 +        return this.view;
 +    }
 +    // CraftBukkit end

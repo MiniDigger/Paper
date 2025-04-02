@@ -69,7 +69,7 @@
          });
          this.addStandardInventorySlots(playerInventory, 8, 84);
          this.addDataSlot(this.selectedRecipeIndex);
-+        this.player = (org.bukkit.entity.Player) playerInventory.player.getBukkitEntity(); // CraftBukkit
++        this.player = (org.bukkit.entity.Player) playerInventory.getPlayer().getBukkitEntity(); // CraftBukkit
      }
  
      public int getSelectedRecipeIndex() {

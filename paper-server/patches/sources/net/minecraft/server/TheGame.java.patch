@@ -1,5 +1,14 @@
 --- a/net/minecraft/server/TheGame.java
 +++ b/net/minecraft/server/TheGame.java
+@@ -110,7 +_,7 @@
+     private TheGame.ReloadableResources resources;
+     private final StructureTemplateManager structureTemplateManager;
+     private final WorldData worldData;
+-    private final PotionBrewing potionBrewing;
++    public PotionBrewing potionBrewing;
+     private FuelValues fuelValues;
+     private final ServerScoreboard scoreboard;
+     @Nullable
 @@ -132,7 +_,7 @@
          this.registries = worldStem.registries();
          this.worldData = worldStem.worldData();

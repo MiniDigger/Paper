@@ -222,17 +222,17 @@ public final class ChatProcessor {
     final class ServerOutgoingChat implements OutgoingChat {
         @Override
         public void sendFormatChangedViewerAware(CraftPlayer player, Component displayName, Component message, ChatRenderer renderer, Set<Audience> viewers, ChatType.Bound chatType) {
-            ChatProcessor.this.server.getPlayerList().broadcastChatMessage(ChatProcessor.this.message, ChatProcessor.this.player, chatType, viewer -> PaperAdventure.asVanilla(renderer.render(player, displayName, message, viewer)));
+            ChatProcessor.this.server.theGame().playerList().broadcastChatMessage(ChatProcessor.this.message, ChatProcessor.this.player, chatType, viewer -> PaperAdventure.asVanilla(renderer.render(player, displayName, message, viewer)));
         }
 
         @Override
         public void sendMessageChanged(CraftPlayer player, net.minecraft.network.chat.Component renderedMessage, Set<Audience> viewers, ChatType.Bound chatType) {
-            ChatProcessor.this.server.getPlayerList().broadcastChatMessage(ChatProcessor.this.message.withUnsignedContent(renderedMessage), ChatProcessor.this.player, chatType);
+            ChatProcessor.this.server.theGame().playerList().broadcastChatMessage(ChatProcessor.this.message.withUnsignedContent(renderedMessage), ChatProcessor.this.player, chatType);
         }
 
         @Override
         public void sendOriginal(CraftPlayer player, Set<Audience> viewers, ChatType.Bound chatType) {
-            ChatProcessor.this.server.getPlayerList().broadcastChatMessage(ChatProcessor.this.message, ChatProcessor.this.player, chatType);
+            ChatProcessor.this.server.theGame().playerList().broadcastChatMessage(ChatProcessor.this.message, ChatProcessor.this.player, chatType);
         }
     }
 
@@ -317,7 +317,7 @@ public final class ChatProcessor {
 
         private void sendToServer(final ChatType.Bound chatType, final @Nullable Function<Audience, net.minecraft.network.chat.Component> msgFunction) {
             final PlayerChatMessage toConsoleMessage = msgFunction == null ? ChatProcessor.this.message : ChatProcessor.this.message.withUnsignedContent(msgFunction.apply(ChatProcessor.this.server.console));
-            ChatProcessor.this.server.logChatMessage(toConsoleMessage.decoratedContent(), chatType, ChatProcessor.this.server.getPlayerList().verifyChatTrusted(toConsoleMessage) ? null : "Not Secure");
+            ChatProcessor.this.server.logChatMessage(toConsoleMessage.decoratedContent(), chatType, ChatProcessor.this.server.theGame().playerList().verifyChatTrusted(toConsoleMessage) ? null : "Not Secure");
         }
     }
 

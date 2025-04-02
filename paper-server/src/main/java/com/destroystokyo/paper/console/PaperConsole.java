@@ -42,7 +42,7 @@ public final class PaperConsole extends SimpleTerminalConsole {
 
     @Override
     protected void runCommand(String command) {
-        this.server.handleConsoleInput(command, this.server.createCommandSourceStack());
+        this.server.handleConsoleInput(command, this.server.theGame().createCommandSourceStack());
     }
 
     @Override

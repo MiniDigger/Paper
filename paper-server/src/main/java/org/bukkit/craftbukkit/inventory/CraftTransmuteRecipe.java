@@ -29,7 +29,7 @@ public class CraftTransmuteRecipe extends TransmuteRecipe implements CraftRecipe
     @Override
     public void addToCraftingManager() {
         final ItemStack unwrappedInternalStack = CraftItemStack.unwrap(this.getResult());
-        MinecraftServer.getServer().getRecipeManager().addRecipe(
+        MinecraftServer.getServer().theGame().getRecipeManager().addRecipe(
             new RecipeHolder<>(CraftRecipe.toMinecraft(this.getKey()),
                 new net.minecraft.world.item.crafting.TransmuteRecipe(this.getGroup(),
                     CraftRecipe.getCategory(this.getCategory()),

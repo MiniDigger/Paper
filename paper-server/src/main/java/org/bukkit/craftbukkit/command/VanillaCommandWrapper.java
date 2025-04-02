@@ -33,7 +33,7 @@ public class VanillaCommandWrapper extends BukkitCommand { // Paper
     }
 
     Commands commands() {
-        return net.minecraft.server.MinecraftServer.getServer().getCommands();
+        return net.minecraft.server.MinecraftServer.getServer().theGame().getCommands();
     }
 
     public VanillaCommandWrapper(CommandNode<CommandSourceStack> vanillaCommand) {
@@ -87,7 +87,7 @@ public class VanillaCommandWrapper extends BukkitCommand { // Paper
             return ((CraftRemoteConsoleCommandSender) sender).getListener().createCommandSourceStack();
         }
         if (sender instanceof ConsoleCommandSender) {
-            return ((CraftServer) sender.getServer()).getServer().createCommandSourceStack();
+            return ((CraftServer) sender.getServer()).getServer().theGame().createCommandSourceStack();
         }
         if (sender instanceof ProxiedCommandSender) {
             return ((ProxiedNativeCommandSender) sender).getHandle();

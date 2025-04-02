@@ -72,7 +72,7 @@
                          return ItemStack.EMPTY;
                      }
 -                } else if (BrewingStandMenu.PotionSlot.mayPlaceItem(itemStack)) {
-+                } else if (BrewingStandMenu.PotionSlot.mayPlaceItem(itemStack, this.inventory.player.level().potionBrewing())) { // Paper - custom potion mixes
++                } else if (BrewingStandMenu.PotionSlot.mayPlaceItem(itemStack, this.inventory.getPlayer().level().potionBrewing())) { // Paper - custom potion mixes
                      if (!this.moveItemStackTo(item, 0, 3, false)) {
                          return ItemStack.EMPTY;
                      }
@@ -117,7 +117,7 @@
 +        }
 +
 +        org.bukkit.craftbukkit.inventory.CraftInventoryBrewer inventory = new org.bukkit.craftbukkit.inventory.CraftInventoryBrewer(this.brewingStand);
-+        this.view = new org.bukkit.craftbukkit.inventory.view.CraftBrewingStandView(this.inventory.player.getBukkitEntity(), inventory, this);
++        this.view = new org.bukkit.craftbukkit.inventory.view.CraftBrewingStandView(this.inventory.getPlayer().getBukkitEntity(), inventory, this);
 +        return this.view;
 +    }
 +    // CraftBukkit end

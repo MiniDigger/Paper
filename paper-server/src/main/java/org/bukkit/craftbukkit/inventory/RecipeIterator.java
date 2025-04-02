@@ -12,7 +12,7 @@ public class RecipeIterator implements Iterator<Recipe> {
     private RecipeHolder<?> currentRecipe;
 
     public RecipeIterator() {
-        this.recipes = MinecraftServer.getServer().getRecipeManager().recipes.byType.entries().iterator();
+        this.recipes = MinecraftServer.getServer().theGame().getRecipeManager().recipes.byType.entries().iterator();
     }
 
     @Override
@@ -28,9 +28,9 @@ public class RecipeIterator implements Iterator<Recipe> {
 
     @Override
     public void remove() {
-        MinecraftServer.getServer().getRecipeManager().recipes.byKey.remove(this.currentRecipe.id());
+        MinecraftServer.getServer().theGame().getRecipeManager().recipes.byKey.remove(this.currentRecipe.id());
         this.recipes.remove();
-        MinecraftServer.getServer().getRecipeManager().finalizeRecipeLoading();
-        MinecraftServer.getServer().getPlayerList().reloadRecipes();
+        MinecraftServer.getServer().theGame().getRecipeManager().finalizeRecipeLoading();
+        MinecraftServer.getServer().theGame().playerList().reloadRecipes();
     }
 }

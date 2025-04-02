@@ -89,7 +89,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         }
 
         // The above is the reverse of the below method.
-        this.server.getPlayerList().updateEntireScoreboard((ServerScoreboard) newBoard, player.getHandle());
+        this.server.theGame().playerList().updateEntireScoreboard((ServerScoreboard) newBoard, player.getHandle());
     }
 
     // CraftBukkit method

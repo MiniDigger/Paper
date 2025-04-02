@@ -89,11 +89,6 @@ public class DummyGeneratorAccess implements WorldGenLevel {
     }
 
     @Override
-    public MinecraftServer getServer() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     public ChunkSource getChunkSource() {
         throw new UnsupportedOperationException("Not supported yet.");
     }

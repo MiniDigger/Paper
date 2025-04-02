@@ -20,6 +20,19 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+tasks.compileJava {
+    // set maxerrors to 1000 to avoid build failure
+    options.compilerArgs.addAll(
+        listOf(
+            "-Xlint:all",
+            "-Xmaxerrs", "1000",
+            "-Xlint:-deprecation",
+            "-Xlint:-unchecked",
+            "-parameters",
+        )
+    )
+}
+
 paperweight {
     minecraftVersion = providers.gradleProperty("mcVersion")
     gitFilePatches = false

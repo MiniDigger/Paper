@@ -41,16 +41,16 @@ public class PaperPotionBrewer implements PotionBrewer {
 
     @Override
     public void addPotionMix(final PotionMix potionMix) {
-        this.minecraftServer.potionBrewing().addPotionMix(potionMix);
+        this.minecraftServer.theGame().potionBrewing().addPotionMix(potionMix);
     }
 
     @Override
     public void removePotionMix(final NamespacedKey key) {
-        this.minecraftServer.potionBrewing.removePotionMix(key);
+        this.minecraftServer.theGame().potionBrewing().removePotionMix(key);
     }
 
     @Override
     public void resetPotionMixes() {
-        this.minecraftServer.potionBrewing = this.minecraftServer.potionBrewing().reload(this.minecraftServer.getWorldData().enabledFeatures());
+        this.minecraftServer.theGame().potionBrewing = this.minecraftServer.theGame().potionBrewing().reload(this.minecraftServer.theGame().getWorldData().enabledFeatures());
     }
 }

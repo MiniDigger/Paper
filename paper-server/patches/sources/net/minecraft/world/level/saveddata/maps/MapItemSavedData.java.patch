@@ -217,7 +217,7 @@
 +    }
 +
 +    private UUIDBackedDimension packUUIDBackedDimension() {
-+        final net.minecraft.server.level.ServerLevel mappedLevel = net.minecraft.server.MinecraftServer.getServer().getLevel(this.dimension);
++        final net.minecraft.server.level.ServerLevel mappedLevel = net.minecraft.server.MinecraftServer.getServer().theGame().getLevel(this.dimension);
 +        return new UUIDBackedDimension(this.dimension, mappedLevel == null ? null : new UUIDAndError(mappedLevel.uuid, ""));
 +    }
 +

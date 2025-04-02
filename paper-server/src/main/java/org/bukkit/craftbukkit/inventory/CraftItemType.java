@@ -152,7 +152,7 @@ public class CraftItemType<M extends ItemMeta> extends HolderableBase<Item> impl
 
     @Override
     public boolean isFuel() {
-        return MinecraftServer.getServer().fuelValues().isFuel(new net.minecraft.world.item.ItemStack(this.getHandle()));
+        return MinecraftServer.getServer().theGame().fuelValues().isFuel(new net.minecraft.world.item.ItemStack(this.getHandle()));
     }
 
     @Override

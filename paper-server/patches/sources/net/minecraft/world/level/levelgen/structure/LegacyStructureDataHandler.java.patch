@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/levelgen/structure/LegacyStructureDataHandler.java
 +++ b/net/minecraft/world/level/levelgen/structure/LegacyStructureDataHandler.java
-@@ -221,17 +_,17 @@
+@@ -221,19 +_,13 @@
          }
      }
  
@@ -14,11 +14,11 @@
                  ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument")
              );
 -        } else if (level == Level.NETHER) {
-+        } else if (level == net.minecraft.world.level.dimension.LevelStem.NETHER) { // CraftBukkit
-             List<String> list = ImmutableList.of("Fortress");
-             return new LegacyStructureDataHandler(storage, list, list);
+-            List<String> list = ImmutableList.of("Fortress");
+-            return new LegacyStructureDataHandler(storage, list, list);
 -        } else if (level == Level.END) {
-+        } else if (level == net.minecraft.world.level.dimension.LevelStem.END) { // CraftBukkit
-             List<String> list = ImmutableList.of("EndCity");
-             return new LegacyStructureDataHandler(storage, list, list);
+-            List<String> list = ImmutableList.of("EndCity");
+-            return new LegacyStructureDataHandler(storage, list, list);
          } else {
+             throw new RuntimeException(String.format(Locale.ROOT, "Unknown dimension type : %s", level));
+         }

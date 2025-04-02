@@ -52,7 +52,7 @@
          this.addDataSlot(DataSlot.shared(this.levelClue, 0));
          this.addDataSlot(DataSlot.shared(this.levelClue, 1));
          this.addDataSlot(DataSlot.shared(this.levelClue, 2));
-+        this.player = (org.bukkit.entity.Player) playerInventory.player.getBukkitEntity(); // CraftBukkit
++        this.player = (org.bukkit.entity.Player) playerInventory.getPlayer().getBukkitEntity(); // CraftBukkit
      }
  
      @Override

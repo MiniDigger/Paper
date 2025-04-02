@@ -76,7 +76,7 @@ public final class DumpItemCommand implements PaperSubcommand {
             referencedComponentTypes.addAll(prototype.keySet());
         }
 
-        final RegistryAccess.Frozen access = ((CraftServer) sender.getServer()).getServer().registryAccess();
+        final RegistryAccess.Frozen access = ((CraftServer) sender.getServer()).getServer().theGame().registryAccess();
         final RegistryOps<Tag> ops = access.createSerializationContext(NbtOps.INSTANCE);
         final Registry<DataComponentType<?>> registry = access.lookupOrThrow(Registries.DATA_COMPONENT_TYPE);
         final List<ComponentLike> componentComponents = new ArrayList<>();

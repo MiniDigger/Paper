@@ -1,0 +1,20 @@
+--- a/net/minecraft/server/PackStuff.java
++++ b/net/minecraft/server/PackStuff.java
+@@ -80,7 +_,7 @@
+     private static WorldDataConfiguration configureRepositoryWithSelection(
+         PackRepository packRepository, Collection<String> collection, FeatureFlagSet featureFlagSet, boolean flag
+     ) {
+-        packRepository.setSelected(collection);
++        packRepository.setSelected(collection, false);
+         enableForcedFeaturePacks(packRepository, featureFlagSet);
+         DataPackConfig selectedPacks = getSelectedPacks(packRepository, flag);
+         FeatureFlagSet featureFlagSet1 = packRepository.getRequestedFeatureFlags().join(featureFlagSet);
+@@ -112,7 +_,7 @@
+                 }
+             }
+ 
+-            packRepository.setSelected(set);
++            packRepository.setSelected(set, false);
+         }
+     }
+ 

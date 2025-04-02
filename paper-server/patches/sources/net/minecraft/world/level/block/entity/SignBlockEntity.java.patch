@@ -92,7 +92,7 @@
 +                io.papermc.paper.event.player.PlayerSignCommandPreprocessEvent event = new io.papermc.paper.event.player.PlayerSignCommandPreprocessEvent(
 +                    (org.bukkit.entity.Player) player.getBukkitEntity(),
 +                    command,
-+                    new org.bukkit.craftbukkit.util.LazyPlayerSet(player.getServer()),
++                    new org.bukkit.craftbukkit.util.LazyPlayerSet(player.theGame().server()),
 +                    (org.bukkit.block.Sign) org.bukkit.craftbukkit.block.CraftBlock.at(this.level, this.worldPosition).getState(),
 +                    frontText ? org.bukkit.block.sign.Side.FRONT : org.bukkit.block.sign.Side.BACK
 +                );

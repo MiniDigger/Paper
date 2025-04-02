@@ -123,7 +123,7 @@
 -            if (LOGGER.isDebugEnabled()) {
 -                LOGGER.error("Command exception: /{}", command, var12);
 +            LOGGER.error("Command exception: /{}", command, var12); // Paper - always show execution exception in console log
-+            if (commandSourceStack.getServer().isDebugging() || LOGGER.isDebugEnabled()) { // Paper - Debugging
++            if (commandSourceStack.theGame().server().isDebugging() || LOGGER.isDebugEnabled()) { // Paper - Debugging
                  StackTraceElement[] stackTrace = var12.getStackTrace();
  
                  for (int i = 0; i < Math.min(stackTrace.length, 3); i++) {

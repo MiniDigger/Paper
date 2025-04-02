@@ -29,7 +29,7 @@ public final class ItemComponentSanitizer {
             put(map, DataComponents.LODESTONE_TRACKER, empty(new LodestoneTracker(Optional.empty(), false))); // We need it to be present to keep the glint
             put(map, DataComponents.POTION_CONTENTS, ItemComponentSanitizer::sanitizePotionContents); // Custom situational serialization
 
-            if (MinecraftServer.getServer().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).size() > 0) {
+            if (MinecraftServer.getServer().theGame().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).size() > 0) {
                 put(map, DataComponents.ENCHANTMENTS, empty(dummyEnchantments())); // We need to keep it present to keep the glint
                 put(map, DataComponents.STORED_ENCHANTMENTS, empty(dummyEnchantments())); // We need to keep it present to keep the glint
             }
@@ -59,7 +59,7 @@ public final class ItemComponentSanitizer {
     // We cant use the empty map from enchantments because we want to keep the glow
     private static ItemEnchantments dummyEnchantments() {
         final ItemEnchantments.Mutable obj = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
-        obj.set(MinecraftServer.getServer().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getRandom(RandomSource.create()).orElseThrow(), 1);
+        obj.set(MinecraftServer.getServer().theGame().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getRandom(RandomSource.create()).orElseThrow(), 1);
         return obj.toImmutable();
     }
 

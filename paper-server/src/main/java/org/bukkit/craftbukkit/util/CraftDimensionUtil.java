@@ -13,10 +13,6 @@ public final class CraftDimensionUtil {
         ResourceKey<LevelStem> typeKey = world.getTypeKey();
         if (typeKey == LevelStem.OVERWORLD) {
             return Level.OVERWORLD;
-        } else if (typeKey == LevelStem.NETHER) {
-            return Level.NETHER;
-        } else if (typeKey == LevelStem.END) {
-            return Level.END;
         }
 
         return world.dimension();

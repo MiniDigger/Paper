@@ -23,13 +23,13 @@
 +            inventory = new org.bukkit.craftbukkit.inventory.CraftInventory(this.container);
 +        }
 +
-+        this.view = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.inventory.player.getBukkitEntity(), inventory, this);
++        this.view = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.inventory.getPlayer().getBukkitEntity(), inventory, this);
 +        return this.view;
 +    }
 +
 +    @Override
 +    public void startOpen() {
-+        this.container.startOpen(this.inventory.player);
++        this.container.startOpen(this.inventory.getPlayer());
 +    }
 +    // CraftBukkit end
  

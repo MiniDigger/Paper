@@ -55,7 +55,7 @@
 +        this.onDisconnect(details, null);
 +    }
 +
-+    public void onDisconnect(DisconnectionDetails details, @Nullable net.kyori.adventure.text.Component quitMessage) {
++    public void onDisconnect(DisconnectionDetails details, net.kyori.adventure.text.Component quitMessage) {
 +        // Paper end - Fix kick event leave message not being sent
          if (this.isSingleplayerOwner()) {
              LOGGER.info("Stopping singleplayer server as player logged out");

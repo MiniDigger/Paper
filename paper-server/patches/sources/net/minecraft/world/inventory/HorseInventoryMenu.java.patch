@@ -14,7 +14,7 @@
 +            return this.view;
 +        }
 +
-+        return this.view = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.inventory.player.getBukkitEntity(), this.horseContainer.getOwner().getInventory(), this);
++        return this.view = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.inventory.getPlayer().getBukkitEntity(), this.horseContainer.getOwner().getInventory(), this);
 +    }
 +    // CraftBukkit end
  

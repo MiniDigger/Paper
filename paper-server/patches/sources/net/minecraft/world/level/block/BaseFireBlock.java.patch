@@ -57,7 +57,7 @@
  
      private static boolean inPortalDimension(Level level) {
 -        return level.dimension() == Level.OVERWORLD || level.dimension() == Level.NETHER;
-+        return level.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.OVERWORLD || level.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.NETHER; // CraftBukkit - getTypeKey()
++        return level.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.OVERWORLD; // CraftBukkit - getTypeKey()
      }
  
      @Override

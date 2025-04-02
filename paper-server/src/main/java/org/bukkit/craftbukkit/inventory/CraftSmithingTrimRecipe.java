@@ -36,6 +36,6 @@ public class CraftSmithingTrimRecipe extends SmithingTrimRecipe implements Craft
             CraftTrimPattern.bukkitToMinecraftHolder(this.getTrimPattern()),
             this.willCopyDataComponents()
         );
-        MinecraftServer.getServer().getRecipeManager().addRecipe(new RecipeHolder<>(CraftRecipe.toMinecraft(this.getKey()), recipe));
+        MinecraftServer.getServer().theGame().getRecipeManager().addRecipe(new RecipeHolder<>(CraftRecipe.toMinecraft(this.getKey()), recipe));
     }
 }

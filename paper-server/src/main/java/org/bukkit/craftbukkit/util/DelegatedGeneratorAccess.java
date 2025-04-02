@@ -146,11 +146,6 @@ public abstract class DelegatedGeneratorAccess implements WorldGenLevel {
     }
 
     @Override
-    public MinecraftServer getServer() {
-        return this.delegate.getServer();
-    }
-
-    @Override
     public Difficulty getDifficulty() {
         return this.delegate.getDifficulty();
     }

@@ -37,6 +37,6 @@ public class CraftSmithingTransformRecipe extends SmithingTransformRecipe implem
             new TransmuteResult(nmsStack.getItemHolder(), nmsStack.getCount(), nmsStack.getComponentsPatch())
             , this.willCopyDataComponents()
         );
-        MinecraftServer.getServer().getRecipeManager().addRecipe(new RecipeHolder<>(CraftRecipe.toMinecraft(this.getKey()), recipe)); // Paper - Option to prevent data components copy
+        MinecraftServer.getServer().theGame().getRecipeManager().addRecipe(new RecipeHolder<>(CraftRecipe.toMinecraft(this.getKey()), recipe)); // Paper - Option to prevent data components copy
     }
 }

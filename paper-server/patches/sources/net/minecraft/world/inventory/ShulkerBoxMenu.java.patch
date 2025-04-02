@@ -14,7 +14,7 @@
 +            return this.view;
 +        }
 +
-+        this.view = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.inventory.player.getBukkitEntity(), new org.bukkit.craftbukkit.inventory.CraftInventory(this.container), this);
++        this.view = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.inventory.getPlayer().getBukkitEntity(), new org.bukkit.craftbukkit.inventory.CraftInventory(this.container), this);
 +        return this.view;
 +    }
 +

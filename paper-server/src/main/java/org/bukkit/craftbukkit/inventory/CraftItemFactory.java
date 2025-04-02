@@ -320,7 +320,7 @@ public final class CraftItemFactory implements ItemFactory {
                 // NON_TREASURE, which does contain all enchantments not in the treasure tag.
                 // Additionally, the allowTreasure boolean is more intended to configure this method to behave like
                 // an enchanting table.
-                : net.minecraft.server.MinecraftServer.getServer().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(EnchantmentTags.IN_ENCHANTING_TABLE),
+                : net.minecraft.server.MinecraftServer.getServer().theGame().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(EnchantmentTags.IN_ENCHANTING_TABLE),
             random
         );
     }
@@ -333,7 +333,7 @@ public final class CraftItemFactory implements ItemFactory {
             Optional.of(
                 io.papermc.paper.registry.set.PaperRegistrySets.convertToNms(
                     Registries.ENCHANTMENT,
-                    net.minecraft.server.MinecraftServer.getServer().registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE).lookupProvider,
+                    net.minecraft.server.MinecraftServer.getServer().theGame().registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE).lookupProvider,
                     keySet
                 )
             ),
@@ -355,7 +355,7 @@ public final class CraftItemFactory implements ItemFactory {
         if (internalStack.isEnchanted()) {
             internalStack.set(net.minecraft.core.component.DataComponents.ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
         }
-        final net.minecraft.core.RegistryAccess registryAccess = net.minecraft.server.MinecraftServer.getServer().registryAccess();
+        final net.minecraft.core.RegistryAccess registryAccess = net.minecraft.server.MinecraftServer.getServer().theGame().registryAccess();
         final net.minecraft.world.item.ItemStack enchanted = net.minecraft.world.item.enchantment.EnchantmentHelper.enchantItem(
             new org.bukkit.craftbukkit.util.RandomSourceWrapper(random),
             internalStack,

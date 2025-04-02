@@ -80,7 +80,7 @@
      @Override
      public boolean canTeleport(Level fromLevel, Level toLevel) {
 -        return fromLevel.dimension() == Level.END && toLevel.dimension() == Level.OVERWORLD && this.getOwner() instanceof ServerPlayer serverPlayer
-+        return fromLevel.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.END && toLevel.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.OVERWORLD && this.getOwner() instanceof ServerPlayer serverPlayer // CraftBukkit
++        return false && toLevel.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.OVERWORLD && this.getOwner() instanceof ServerPlayer serverPlayer // CraftBukkit
              ? super.canTeleport(fromLevel, toLevel) && serverPlayer.seenCredits
              : super.canTeleport(fromLevel, toLevel);
      }

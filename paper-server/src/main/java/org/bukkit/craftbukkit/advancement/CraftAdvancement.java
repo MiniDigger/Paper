@@ -53,7 +53,7 @@ public class CraftAdvancement implements org.bukkit.advancement.Advancement {
     @Override
     public org.bukkit.advancement.Advancement getParent() {
         return this.handle.value().parent()
-            .map(net.minecraft.server.MinecraftServer.getServer().getAdvancements()::get)
+            .map(net.minecraft.server.MinecraftServer.getServer().theGame().getAdvancements()::get)
             .map(AdvancementHolder::toBukkit)
             .orElse(null);
     }
@@ -61,7 +61,7 @@ public class CraftAdvancement implements org.bukkit.advancement.Advancement {
     @Override
     public Collection<org.bukkit.advancement.Advancement> getChildren() {
         final com.google.common.collect.ImmutableList.Builder<org.bukkit.advancement.Advancement> children = com.google.common.collect.ImmutableList.builder();
-        final net.minecraft.advancements.AdvancementNode advancementNode = net.minecraft.server.MinecraftServer.getServer().getAdvancements().tree().get(this.handle);
+        final net.minecraft.advancements.AdvancementNode advancementNode = net.minecraft.server.MinecraftServer.getServer().theGame().getAdvancements().tree().get(this.handle);
         if (advancementNode != null) {
             for (final net.minecraft.advancements.AdvancementNode child : advancementNode.children()) {
                 children.add(child.holder().toBukkit());
@@ -72,7 +72,7 @@ public class CraftAdvancement implements org.bukkit.advancement.Advancement {
 
     @Override
     public org.bukkit.advancement.Advancement getRoot() {
-        final net.minecraft.advancements.AdvancementNode advancementNode = net.minecraft.server.MinecraftServer.getServer().getAdvancements().tree().get(this.handle);
+        final net.minecraft.advancements.AdvancementNode advancementNode = net.minecraft.server.MinecraftServer.getServer().theGame().getAdvancements().tree().get(this.handle);
         return java.util.Objects.requireNonNull(advancementNode, "could not find internal advancement node for advancement " + this.handle.id()).root().holder().toBukkit();
     }
 }

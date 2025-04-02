@@ -68,7 +68,7 @@
 +    public volatile Thread shutdownThread; // Paper - Improved watchdog support
 +    public final io.papermc.paper.configuration.PaperConfigurations paperConfigurations; // Paper - add paper configuration files
 +    public boolean isIteratingOverLevels = false; // Paper - Throw exception on world create while being ticked
-+    private final Set<String> pluginsBlockingSleep = new java.util.HashSet<>(); // Paper - API to allow/disallow tick sleeping
++    private final java.util.Set<String> pluginsBlockingSleep = new java.util.HashSet<>(); // Paper - API to allow/disallow tick sleeping
 +    public static final long SERVER_INIT = System.nanoTime(); // Paper - Lag compensation
 +
      public static <S extends MinecraftServer> S spin(
@@ -427,7 +427,7 @@
 +                while ((task = this.processQueue.poll()) != null) {
 +                    task.run();
 +                }
-+                for (final ServerLevel level : this.levels.values()) {
++                for (final ServerLevel level : this.theGame.getAllLevels()) {
 +                    // process unloads
 +                    level.getChunkSource().tick(() -> true, false);
 +                }
@@ -506,10 +506,10 @@
          ProfilerFiller profilerFiller = Profiler.get();
          PlayerList playerList = theGame.playerList();
          playerList.getPlayers().forEach(serverPlayer1 -> serverPlayer1.connection.suspendFlushing());
-+        this.theGame.getScheduler().mainThreadHeartbeat(); // CraftBukkit
++        this.theGame.server().server.getScheduler().mainThreadHeartbeat(); // CraftBukkit
 +        // Paper start - Folia scheduler API
 +        ((io.papermc.paper.threadedregions.scheduler.FoliaGlobalRegionScheduler) org.bukkit.Bukkit.getGlobalRegionScheduler()).tick();
-+        getAllLevels().forEach(level -> {
++        theGame.getAllLevels().forEach(level -> {
 +            for (final net.minecraft.world.entity.Entity entity : level.getEntities().getAll()) {
 +                if (entity.isRemoved()) {
 +                    continue;
@@ -534,7 +534,7 @@
 +
 +        // Send time updates to everyone, it will get the right time from the world the player is in.
 +        // Paper start - Perf: Optimize time updates
-+        for (final ServerLevel level : this.getAllLevels()) {
++        for (final ServerLevel level : this.theGame.getAllLevels()) {
 +            final boolean doDaylight = level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT);
 +            final long dayTime = level.getDayTime();
 +            long worldTime = level.getGameTime();

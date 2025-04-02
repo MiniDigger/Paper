@@ -128,7 +128,7 @@
 +    @Nullable
 +    @Override
 +    public Player getPlayerByUUID(java.util.UUID uuid) {
-+        final Player player = this.getServer().getPlayerList().getPlayer(uuid);
++        final Player player = this.theGame.playerList().getPlayer(uuid);
 +        return player != null && player.level() == this ? player : null;
 +    }
 +    // Paper end - optimise getPlayerByUUID
@@ -178,7 +178,7 @@
 +        this.serverLevelData.setWorld(this);
 +
 +        if (biomeProvider != null) {
-+            net.minecraft.world.level.biome.BiomeSource worldChunkManager = new org.bukkit.craftbukkit.generator.CustomWorldChunkManager(this.getWorld(), biomeProvider, this.server.registryAccess().lookupOrThrow(Registries.BIOME), chunkGenerator.getBiomeSource()); // Paper - add vanillaBiomeProvider
++            net.minecraft.world.level.biome.BiomeSource worldChunkManager = new org.bukkit.craftbukkit.generator.CustomWorldChunkManager(this.getWorld(), biomeProvider, this.theGame.registryAccess().lookupOrThrow(Registries.BIOME), chunkGenerator.getBiomeSource()); // Paper - add vanillaBiomeProvider
 +            if (chunkGenerator instanceof net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator cga) {
 +                chunkGenerator = new net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator(worldChunkManager, cga.settings);
 +            } else if (chunkGenerator instanceof net.minecraft.world.level.levelgen.FlatLevelSource cpf) {
@@ -551,8 +551,8 @@
 +        ServerLevel serverLevel1 = this;
 +
 +        this.serverLevelData.setWorldBorder(serverLevel1.getWorldBorder().createSettings());
-+        this.serverLevelData.setCustomBossEvents(this.server.getCustomBossEvents().save(this.registryAccess()));
-+        this.levelStorageAccess.saveDataTag(this.server.registryAccess(), this.serverLevelData, this.server.getPlayerList().getSingleplayerData());
++        this.serverLevelData.setCustomBossEvents(this.theGame.getCustomBossEvents().save(this.registryAccess()));
++        this.levelStorageAccess.saveDataTag(this.theGame.registryAccess(), this.serverLevelData, this.theGame.playerList().getSingleplayerData());
 +        // CraftBukkit end
      }
  
@@ -1055,7 +1055,7 @@
  
 +    // Paper start - respect global sound events gamerule
 +    public List<net.minecraft.server.level.ServerPlayer> getPlayersForGlobalSoundGamerule() {
-+        return this.getGameRules().getBoolean(GameRules.RULE_GLOBAL_SOUND_EVENTS) ? ((ServerLevel) this).getServer().getPlayerList().players : ((ServerLevel) this).players();
++        return this.getGameRules().getBoolean(GameRules.RULE_GLOBAL_SOUND_EVENTS) ? ((net.minecraft.server.level.ServerLevel) this).theGame.playerList().players : ((ServerLevel) this).players();
 +    }
 +
 +    public double getGlobalSoundRangeSquared(java.util.function.Function<org.spigotmc.SpigotWorldConfig, Integer> rangeFunction) {
@@ -1145,7 +1145,7 @@
 +            org.spigotmc.AsyncCatcher.catchOp("entity unregister"); // Spigot
 +            // Spigot start // TODO I don't think this is needed anymore
 +            if (entity instanceof Player player) {
-+                for (final ServerLevel level : ServerLevel.this.getServer().getAllLevels()) {
++                for (final ServerLevel level : net.minecraft.server.level.ServerLevel.this.theGame.getAllLevels()) {
 +                    for (final Optional<net.minecraft.world.level.saveddata.SavedData> savedData : level.getDataStorage().cache.values()) {
 +                        if (savedData.isEmpty() || !(savedData.get() instanceof MapItemSavedData map)) {
 +                            continue;
@@ -1190,7 +1190,7 @@
 +            // CraftBukkit start
 +            entity.valid = false;
 +            if (!(entity instanceof ServerPlayer)) {
-+                for (ServerPlayer player : ServerLevel.this.server.getPlayerList().players) { // Paper - call onEntityRemove for all online players
++                for (ServerPlayer player : net.minecraft.server.level.ServerLevel.this.theGame.playerList().players) { // Paper - call onEntityRemove for all online players
 +                    player.getBukkitEntity().onEntityRemove(entity);
 +                }
 +            }
@@ -1208,7 +1208,7 @@
 +    @Override
 +    @Nullable
 +    public Player getGlobalPlayerByUUID(java.util.UUID uuid) {
-+        return this.server.getPlayerList().getPlayer(uuid);
++        return this.theGame.playerList().getPlayer(uuid);
 +    }
 +    // Paper end - check global player list where appropriate
 +

@@ -78,7 +78,7 @@ public class CraftDataPack implements DataPack {
 
     @Override
     public boolean isEnabled() {
-        return ((CraftServer) Bukkit.getServer()).getServer().getPackRepository().getSelectedIds().contains(this.getRawId());
+        return ((CraftServer) Bukkit.getServer()).getServer().theGame().getPackRepository().getSelectedIds().contains(this.getRawId());
     }
 
     @Override

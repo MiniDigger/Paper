@@ -60,7 +60,7 @@ public class CraftEnderSignal extends CraftEntity implements EnderSignal {
 
     @Override
     public void setItem(ItemStack item) {
-        this.getHandle().setItem(item != null ? CraftItemStack.asNMSCopy(item) : Items.ENDER_EYE.getDefaultInstance());
+        this.getHandle().setItem(item != null ? CraftItemStack.asNMSCopy(item) : net.minecraft.world.item.ItemStack.EMPTY);
     }
 
     @Override

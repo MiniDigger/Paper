@@ -84,7 +84,7 @@
              }
          });
          this.addStandardInventorySlots(playerInventory, 8, 84);
-+        this.player = (org.bukkit.entity.Player) playerInventory.player.getBukkitEntity(); // CraftBukkit
++        this.player = (org.bukkit.entity.Player) playerInventory.getPlayer().getBukkitEntity(); // CraftBukkit
      }
  
      @Override

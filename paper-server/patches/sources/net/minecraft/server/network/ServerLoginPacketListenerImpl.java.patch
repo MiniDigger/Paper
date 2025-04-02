@@ -58,7 +58,7 @@
      @Override
      public void tick() {
 +        // Paper start - Do not allow logins while the server is shutting down
-+        if (!this.server.isRunning()) {
++        if (!this.theGame.server().isRunning()) {
 +            this.disconnect(org.bukkit.craftbukkit.util.CraftChatMessage.fromString(org.spigotmc.SpigotConfig.restartMessage)[0]);
 +            return;
 +        }
@@ -134,7 +134,7 @@
 +                        ServerLoginPacketListenerImpl.this.startClientVerification(gameprofile);
 +                    } catch (Exception ex) {
 +                        ServerLoginPacketListenerImpl.this.disconnect("Failed to verify username!");
-+                        ServerLoginPacketListenerImpl.this.server.server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + ServerLoginPacketListenerImpl.this.requestedUsername, ex);
++                        net.minecraft.server.network.ServerLoginPacketListenerImpl.this.theGame.server().server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + ServerLoginPacketListenerImpl.this.requestedUsername, ex);
 +                    }
 +                });
 +                // Paper end - Cache authenticator threads
@@ -249,7 +249,7 @@
 +        String playerName = gameprofile.getName();
 +        java.net.InetAddress address = ((java.net.InetSocketAddress) this.connection.getRemoteAddress()).getAddress();
 +        java.util.UUID uniqueId = gameprofile.getId();
-+        final org.bukkit.craftbukkit.CraftServer server = ServerLoginPacketListenerImpl.this.server.server;
++        final org.bukkit.craftbukkit.CraftServer server = net.minecraft.server.network.ServerLoginPacketListenerImpl.this.theGame.server().server;
 +
 +        // Paper start - Add more fields to AsyncPlayerPreLoginEvent
 +        final InetAddress rawAddress = ((InetSocketAddress) this.connection.channel.remoteAddress()).getAddress();
@@ -276,7 +276,7 @@
 +                }
 +            };
 +
-+            ServerLoginPacketListenerImpl.this.server.processQueue.add(waitable);
++            net.minecraft.server.network.ServerLoginPacketListenerImpl.this.theGame.server().processQueue.add(waitable);
 +            if (waitable.get() != PlayerPreLoginEvent.Result.ALLOWED) {
 +                this.disconnect(io.papermc.paper.adventure.PaperAdventure.asVanilla(event.kickMessage())); // Paper - Adventure
 +            }
@@ -329,7 +329,7 @@
 +                    ServerLoginPacketListenerImpl.this.startClientVerification(gameprofile);
 +                } catch (Exception ex) {
 +                    disconnect("Failed to verify username!");
-+                    server.server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + this.authenticatedProfile.getName(), ex);
++                    theGame.server().server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + this.authenticatedProfile.getName(), ex);
 +                }
 +            });
 +            return;
@@ -340,7 +340,7 @@
  
      @Override
      public void handleLoginAcknowledgement(ServerboundLoginAcknowledgedPacket packet) {
-+        net.minecraft.network.protocol.PacketUtils.ensureRunningOnSameThread(packet, this, this.server); // CraftBukkit
++        net.minecraft.network.protocol.PacketUtils.ensureRunningOnSameThread(packet, this, this.theGame.server()); // CraftBukkit
          Validate.validState(this.state == ServerLoginPacketListenerImpl.State.PROTOCOL_SWITCHING, "Unexpected login acknowledgement packet");
          this.connection.setupOutboundProtocol(ConfigurationProtocols.CLIENTBOUND);
          CommonListenerCookie commonListenerCookie = CommonListenerCookie.createInitial(Objects.requireNonNull(this.authenticatedProfile), this.transferred);
@@ -357,7 +357,7 @@
      @Override
      public void handleCookieResponse(ServerboundCookieResponsePacket packet) {
 +        // CraftBukkit start
-+        net.minecraft.network.protocol.PacketUtils.ensureRunningOnSameThread(packet, this, this.server);
++        net.minecraft.network.protocol.PacketUtils.ensureRunningOnSameThread(packet, this, this.theGame.server());
 +        if (this.player != null && this.player.getBukkitEntity().handleCookieResponse(packet)) {
 +            return;
 +        }

@@ -45,7 +45,7 @@ public final class FeatureSeedsGeneration implements TransformAction {
         final Reference2LongMap<Holder<ConfiguredFeature<?, ?>>> features = Objects.requireNonNullElseGet(featureNode.get(new TypeToken<Reference2LongMap<Holder<ConfiguredFeature<?, ?>>>>() {}), Reference2LongOpenHashMap::new);
         final Random random = new SecureRandom();
         AtomicInteger counter = new AtomicInteger(0);
-        MinecraftServer.getServer().registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).listElements().forEach(holder -> {
+        MinecraftServer.getServer().theGame().registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).listElements().forEach(holder -> {
             if (features.containsKey(holder)) {
                 return;
             }

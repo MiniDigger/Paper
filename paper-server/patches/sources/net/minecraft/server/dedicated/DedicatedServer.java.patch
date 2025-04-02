@@ -92,21 +92,21 @@
          }
  
 +        // Spigot start
-+        this.setPlayerList(new DedicatedPlayerList(this, this.registries(), this.playerDataStorage));
++        this.setPlayerList(new DedicatedPlayerList(this, this.theGame, this.playerDataStorage));
 +        org.spigotmc.SpigotConfig.init((java.io.File) this.options.valueOf("spigot-settings"));
 +        org.spigotmc.SpigotConfig.registerCommands();
 +        // Spigot end
 +        io.papermc.paper.util.ObfHelper.INSTANCE.getClass(); // Paper - load mappings for stacktrace deobf and etc.
 +        // Paper start - initialize global and world-defaults configuration
-+        this.paperConfigurations.initializeGlobalConfiguration(this.registryAccess());
-+        this.paperConfigurations.initializeWorldDefaultsConfiguration(this.registryAccess());
++        this.paperConfigurations.initializeGlobalConfiguration(this.theGame().registryAccess());
++        this.paperConfigurations.initializeWorldDefaultsConfiguration(this.theGame().registryAccess());
 +        // Paper end - initialize global and world-defaults configuration
 +        this.server.spark.enableEarlyIfRequested(); // Paper - spark
 +        // Paper start - fix converting txt to json file; convert old users earlier after PlayerList creation but before file load/save
 +        if (this.convertOldUsers()) {
 +            this.getProfileCache().save(false); // Paper
 +        }
-+        this.getPlayerList().loadAndSaveFiles(); // Must be after convertNames
++        this.theGame().playerList().loadAndSaveFiles(); // Must be after convertNames
 +        // Paper end - fix converting txt to json file
 +        org.spigotmc.WatchdogThread.doStart(org.spigotmc.SpigotConfig.timeoutTime, org.spigotmc.SpigotConfig.restartOnCrash); // Paper - start watchdog thread
 +        thread.start(); // Paper - Enhance console tab completions for brigadier commands; start console thread after MinecraftServer.console & PaperConfig are initialized

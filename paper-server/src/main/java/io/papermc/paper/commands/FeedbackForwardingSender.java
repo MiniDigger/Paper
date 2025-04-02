@@ -68,7 +68,7 @@ public final class FeedbackForwardingSender extends ServerCommandSender {
     }
 
     public CommandSourceStack asVanilla() {
-        final @Nullable ServerLevel overworld = this.server.getServer().overworld();
+        final @Nullable ServerLevel overworld = this.server.getServer().theGame().overworld();
         return new CommandSourceStack(
             new Source(this),
             overworld == null ? Vec3.ZERO : Vec3.atLowerCornerOf(overworld.getSharedSpawnPos()),
@@ -77,7 +77,7 @@ public final class FeedbackForwardingSender extends ServerCommandSender {
             4,
             this.getName(),
             net.minecraft.network.chat.Component.literal(this.getName()),
-            this.server.getServer(),
+            this.server.getServer().theGame(),
             null
         );
     }

@@ -52,7 +52,7 @@ public final class CraftLocation {
     }
 
     public static Location fromGlobalPos(net.minecraft.core.GlobalPos globalPos) {
-        return CraftLocation.toBukkit(globalPos.pos(), net.minecraft.server.MinecraftServer.getServer().getLevel(globalPos.dimension()));
+        return CraftLocation.toBukkit(globalPos.pos(), net.minecraft.server.MinecraftServer.getServer().theGame().getLevel(globalPos.dimension()));
     }
 
     public static Vec3 toVec3(Location loc) {

@@ -15,7 +15,7 @@
 +        }
 +
 +        org.bukkit.craftbukkit.inventory.CraftInventory inventory = new org.bukkit.craftbukkit.inventory.CraftInventory(this.hopper);
-+        this.view = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.inventory.player.getBukkitEntity(), inventory, this);
++        this.view = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.inventory.getPlayer().getBukkitEntity(), inventory, this);
 +        return this.view;
 +    }
 +    // CraftBukkit end

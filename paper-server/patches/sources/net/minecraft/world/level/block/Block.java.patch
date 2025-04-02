@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/block/Block.java
 +++ b/net/minecraft/world/level/block/Block.java
-@@ -100,6 +_,21 @@
+@@ -100,6 +_,19 @@
      public static final int UPDATE_LIMIT = 512;
      protected final StateDefinition<Block, BlockState> stateDefinition;
      private BlockState defaultBlockState;
@@ -9,8 +9,6 @@
 +        return io.papermc.paper.configuration.GlobalConfiguration.get().unsupportedSettings.allowPermanentBlockBreakExploits ||
 +            this != Blocks.BARRIER &&
 +            this != Blocks.BEDROCK &&
-+            this != Blocks.END_PORTAL_FRAME &&
-+            this != Blocks.END_PORTAL &&
 +            this != Blocks.END_GATEWAY &&
 +            this != Blocks.COMMAND_BLOCK &&
 +            this != Blocks.REPEATING_COMMAND_BLOCK &&

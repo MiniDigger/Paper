@@ -33,7 +33,7 @@ public class V29_LogIPs implements TransformAction {
         server.settings.update((config) -> {
             final Properties newProps = new Properties(config.properties);
             newProps.setProperty("log-ips", String.valueOf(val));
-            return config.reload(server.registryAccess(), newProps, server.options);
+            return config.reload(server.theGame().registryAccess(), newProps, server.options);
         });
 
         value.raw(null);

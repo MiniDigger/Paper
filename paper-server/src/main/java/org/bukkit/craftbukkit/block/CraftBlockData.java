@@ -416,7 +416,6 @@ public class CraftBlockData implements BlockData {
         register(net.minecraft.world.level.block.DoorBlock.class, org.bukkit.craftbukkit.block.data.CraftDoor::new);
         register(net.minecraft.world.level.block.DoublePlantBlock.class, org.bukkit.craftbukkit.block.data.CraftDoublePlant::new);
         register(net.minecraft.world.level.block.DropperBlock.class, org.bukkit.craftbukkit.block.data.CraftDropper::new);
-        register(net.minecraft.world.level.block.EndPortalFrameBlock.class, org.bukkit.craftbukkit.block.data.CraftEndPortalFrame::new);
         register(net.minecraft.world.level.block.EndRodBlock.class, org.bukkit.craftbukkit.block.data.CraftEndRod::new);
         register(net.minecraft.world.level.block.EnderChestBlock.class, org.bukkit.craftbukkit.block.data.CraftEnderChest::new);
         register(net.minecraft.world.level.block.FarmBlock.class, org.bukkit.craftbukkit.block.data.CraftFarm::new);

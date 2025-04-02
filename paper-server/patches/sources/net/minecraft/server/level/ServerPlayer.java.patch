@@ -658,7 +658,7 @@
                  ProfilerFiller profilerFiller = Profiler.get();
                  profilerFiller.push("moving");
 -                if (resourceKey == Level.OVERWORLD && level.dimension() == Level.NETHER) {
-+                if (level != null && resourceKey == net.minecraft.world.level.dimension.LevelStem.OVERWORLD && level.getTypeKey() == net.minecraft.world.level.dimension.LevelStem.NETHER) { // CraftBukkit - empty to fall through to null to event
++                if (level != null && resourceKey == net.minecraft.world.level.dimension.LevelStem.OVERWORLD && false) { // CraftBukkit - empty to fall through to null to event
                      this.enteredNetherPosition = this.position();
                  }
  
@@ -1139,14 +1139,14 @@
 +                this.getBukkitEntity(),
 +                clientInformation.mainHand() == HumanoidArm.LEFT ? org.bukkit.inventory.MainHand.LEFT : org.bukkit.inventory.MainHand.RIGHT
 +            );
-+            this.server.server.getPluginManager().callEvent(event);
++            this.theGame.server().server.getPluginManager().callEvent(event);
 +        }
 +        if (this.language == null || !this.language.equals(clientInformation.language())) { // Paper
 +            org.bukkit.event.player.PlayerLocaleChangeEvent event = new org.bukkit.event.player.PlayerLocaleChangeEvent(
 +                this.getBukkitEntity(),
 +                clientInformation.language()
 +            );
-+            this.server.server.getPluginManager().callEvent(event);
++            this.theGame.server().server.getPluginManager().callEvent(event);
 +        }
 +        // CraftBukkit end
 +        // Paper start - don't call options events on login
@@ -1213,7 +1213,7 @@
 +        boolean actuallyDisplayInChat = false;
 +        if (respawnConfig != null) {
 +            actuallyDisplayInChat = displayInChat && !respawnConfig.isSamePosition(this.respawnConfig);
-+            spawnLoc = org.bukkit.craftbukkit.util.CraftLocation.toBukkit(respawnConfig.pos(), this.getServer().getLevel(respawnConfig.dimension()));
++            spawnLoc = org.bukkit.craftbukkit.util.CraftLocation.toBukkit(respawnConfig.pos(), this.theGame.getLevel(respawnConfig.dimension()));
 +            spawnLoc.setYaw(respawnConfig.angle());
 +        }
 +        org.bukkit.event.player.PlayerSpawnChangeEvent dumbEvent = new org.bukkit.event.player.PlayerSpawnChangeEvent(
@@ -1291,9 +1291,9 @@
  
      public void loadGameTypes(@Nullable CompoundTag tag) {
 +        // Paper start - Expand PlayerGameModeChangeEvent
-+        if (this.server.getForcedGameType() != null && this.server.getForcedGameType() != readPlayerMode(tag, "playerGameType")) {
-+            if (new org.bukkit.event.player.PlayerGameModeChangeEvent(this.getBukkitEntity(), org.bukkit.GameMode.getByValue(this.server.getDefaultGameType().getId()), org.bukkit.event.player.PlayerGameModeChangeEvent.Cause.DEFAULT_GAMEMODE, null).callEvent()) {
-+                this.gameMode.setGameModeForPlayer(this.server.getForcedGameType(), GameType.DEFAULT_MODE);
++        if (this.theGame.server().getForcedGameType(theGame) != null && this.theGame.server().getForcedGameType(theGame) != readPlayerMode(tag, "playerGameType")) {
++            if (new org.bukkit.event.player.PlayerGameModeChangeEvent(this.getBukkitEntity(), org.bukkit.GameMode.getByValue(this.theGame.getDefaultGameType().getId()), org.bukkit.event.player.PlayerGameModeChangeEvent.Cause.DEFAULT_GAMEMODE, null).callEvent()) {
++                this.gameMode.setGameModeForPlayer(this.theGame.server().getForcedGameType(theGame), GameType.DEFAULT_MODE);
 +            } else {
 +                this.gameMode.setGameModeForPlayer(readPlayerMode(tag,"playerGameType"), readPlayerMode(tag, "previousPlayerGameType"));
 +            }

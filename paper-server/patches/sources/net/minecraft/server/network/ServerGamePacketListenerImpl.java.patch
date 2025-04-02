@@ -1,5 +1,13 @@
 --- a/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+@@ -141,6 +_,7 @@
+ import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
+ import net.minecraft.resources.ResourceKey;
+ import net.minecraft.resources.ResourceLocation;
++import net.minecraft.server.MinecraftServer;
+ import net.minecraft.server.TheGame;
+ import net.minecraft.server.level.ServerLevel;
+ import net.minecraft.server.level.ServerPlayer;
 @@ -210,6 +_,39 @@
  import net.minecraft.world.phys.shapes.VoxelShape;
  import org.slf4j.Logger;
@@ -83,7 +91,7 @@
  
      public ServerGamePacketListenerImpl(TheGame theGame, Connection connection, ServerPlayer serverPlayer, CommonListenerCookie commonListenerCookie) {
 -        super(theGame, connection, commonListenerCookie);
-+        super(theGame, connection, commonListenerCookie, player); // CraftBukkit
++        super(theGame, connection, commonListenerCookie, serverPlayer); // CraftBukkit
          this.chunkSender = new PlayerChunkSender(connection.isMemoryConnection());
          this.player = serverPlayer;
          serverPlayer.connection = this;
@@ -400,7 +408,7 @@
 -        PacketUtils.ensureRunningOnSameThread(packet, this, this.player.serverLevel());
 +        // PacketUtils.ensureRunningOnSameThread(packet, this, this.player.serverLevel()); // Paper - AsyncTabCompleteEvent; run this async
 +        // CraftBukkit start
-+        if (!this.tabSpamThrottler.isIncrementAndUnderThreshold() && !this.server.getPlayerList().isOp(this.player.getGameProfile()) && !this.server.isSingleplayerOwner(this.player.getGameProfile())) { // Paper - configurable tab spam limits
++        if (!this.tabSpamThrottler.isIncrementAndUnderThreshold() && !this.theGame.playerList().isOp(this.player.getGameProfile()) && !this.theGame.server().isSingleplayerOwner(this.player.getGameProfile())) { // Paper - configurable tab spam limits
 +            this.disconnectAsync(Component.translatable("disconnect.spam"), org.bukkit.event.player.PlayerKickEvent.Cause.SPAM); // Paper - Kick event cause // Paper - add proper async disconnect
 +            return;
 +        }
@@ -1406,7 +1414,7 @@
      public void handleChat(ServerboundChatPacket packet) {
 +        // CraftBukkit start - async chat
 +        // SPIGOT-3638
-+        if (this.server.isStopped()) {
++        if (this.theGame.server().isStopped()) {
 +            return;
 +        }
 +        // CraftBukkit end
@@ -1421,7 +1429,7 @@
 -                Component component = this.theGame.server().getChatDecorator().decorate(this.player, signedMessage.decoratedContent());
 -                this.chatMessageChain.append(completableFuture, filteredText -> {
 -                    PlayerChatMessage playerChatMessage = signedMessage.withUnsignedContent(component).filter(filteredText.mask());
-+                CompletableFuture<FilteredText> completableFuture = this.filterTextPacket(signedMessage.signedContent()).thenApplyAsync(java.util.function.Function.identity(), this.server.chatExecutor); // CraftBukkit - async chat
++                CompletableFuture<FilteredText> completableFuture = this.filterTextPacket(signedMessage.signedContent()).thenApplyAsync(java.util.function.Function.identity(), this.theGame.server().chatExecutor); // CraftBukkit - async chat
 +                CompletableFuture<Component> componentFuture = this.theGame.server().getChatDecorator().decorate(this.player, null, signedMessage.decoratedContent()); // Paper - Adventure
 +
 +                this.chatMessageChain.append(CompletableFuture.allOf(completableFuture, componentFuture), ($) -> { // Paper - Adventure
@@ -1455,7 +1463,7 @@
 +            LOGGER.info("{} issued server command: {}", this.player.getScoreboardName(), prefixedCommand);
 +        }
 +
-+        PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(this.getCraftPlayer(), prefixedCommand, new org.bukkit.craftbukkit.util.LazyPlayerSet(this.server));
++        PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(this.getCraftPlayer(), prefixedCommand, new org.bukkit.craftbukkit.util.LazyPlayerSet(this.theGame.server()));
 +        this.cserver.getPluginManager().callEvent(event);
 +
 +        if (event.isCancelled()) {
@@ -1490,7 +1498,7 @@
 +            LOGGER.info("{} issued server command: {}", this.player.getScoreboardName(), command);
 +        } // Paper - Add missing SpigotConfig logCommands check
 +
-+        PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(this.getCraftPlayer(), command, new org.bukkit.craftbukkit.util.LazyPlayerSet(this.server));
++        PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(this.getCraftPlayer(), command, new org.bukkit.craftbukkit.util.LazyPlayerSet(this.theGame.server()));
 +        this.cserver.getPluginManager().callEvent(event);
 +        command = event.getMessage().substring(1);
 +
@@ -1578,7 +1586,7 @@
 +            if (!async && !org.bukkit.Bukkit.isPrimaryThread()) {
 +                org.spigotmc.AsyncCatcher.catchOp("Asynchronous player chat is not allowed here");
 +            }
-+            new io.papermc.paper.adventure.ChatProcessor(this.server, this.player, original, async).process();
++            new io.papermc.paper.adventure.ChatProcessor(this.theGame.server(), this.player, original, async).process();
 +            // Paper end
 +        }
 +    }
@@ -2403,7 +2411,7 @@
 +                            // Paper end - Add PlayerRecipeBookClickEvent - forward to legacy event
 +
 +                            // Cast to keyed should be safe as the recipe will never be a MerchantRecipe.
-+                            recipeHolder = this.server.getRecipeManager().byKey(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, org.bukkit.craftbukkit.util.CraftNamespacedKey.toMinecraft(recipeName))).orElse(null); // Paper - Add PlayerRecipeBookClickEvent - forward to legacy event
++                            recipeHolder = this.theGame.getRecipeManager().byKey(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, org.bukkit.craftbukkit.util.CraftNamespacedKey.toMinecraft(recipeName))).orElse(null); // Paper - Add PlayerRecipeBookClickEvent - forward to legacy event
 +                            if (recipeHolder == null) {
 +                                return;
 +                            }

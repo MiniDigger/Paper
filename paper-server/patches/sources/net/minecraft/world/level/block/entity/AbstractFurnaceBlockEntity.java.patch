@@ -191,7 +191,7 @@
 +        int cookTime = level != null
 +            ? furnace.quickCheck.getRecipeFor(singleRecipeInput, level).map(recipeHolder -> recipeHolder.value().cookingTime()).orElse(200)
 +            /* passing a null level here is safe. world is only used for map extending recipes which won't happen here */
-+            : (net.minecraft.server.MinecraftServer.getServer().getRecipeManager().getRecipeFor(recipeType, singleRecipeInput, level).map(recipeHolder -> recipeHolder.value().cookingTime()).orElse(200));
++            : (net.minecraft.server.MinecraftServer.getServer().theGame().getRecipeManager().getRecipeFor(recipeType, singleRecipeInput, level).map(recipeHolder -> recipeHolder.value().cookingTime()).orElse(200));
 +        cookTime = furnace.superChargeLevel > 0 ? (int)(cookTime / (1.0F + furnace.superChargeLevel)) : cookTime;
 +        return (int) Math.ceil (cookTime / cookSpeedMultiplier);
 +        // Paper end - cook speed multiplier API

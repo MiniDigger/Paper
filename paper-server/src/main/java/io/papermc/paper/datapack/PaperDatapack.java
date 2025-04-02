@@ -29,8 +29,8 @@ public class PaperDatapack extends PaperDiscoveredDatapack implements Datapack {
     @Override
     public void setEnabled(final boolean enabled) {
         final MinecraftServer server = MinecraftServer.getServer();
-        final List<Pack> enabledPacks = new ArrayList<>(server.getPackRepository().getSelectedPacks());
-        final Pack packToChange = server.getPackRepository().getPack(this.getName());
+        final List<Pack> enabledPacks = new ArrayList<>(server.theGame().getPackRepository().getSelectedPacks());
+        final Pack packToChange = server.theGame().getPackRepository().getPack(this.getName());
         if (packToChange == null) {
             throw new IllegalStateException("Cannot toggle state of pack that doesn't exist: " + this.getName());
         }
@@ -42,7 +42,7 @@ public class PaperDatapack extends PaperDiscoveredDatapack implements Datapack {
         } else {
             enabledPacks.remove(packToChange);
         }
-        server.reloadResources(enabledPacks.stream().map(Pack::getId).toList(), ServerResourcesReloadedEvent.Cause.PLUGIN);
+        server.theGame().reloadResources(enabledPacks.stream().map(Pack::getId).toList(), ServerResourcesReloadedEvent.Cause.PLUGIN);
     }
 
     @Override

@@ -306,13 +306,13 @@ public final class CraftMagicNumbers implements UnsafeValues {
         final net.minecraft.advancements.Advancement nms = net.minecraft.advancements.Advancement.CODEC.parse(ops, jsonelement).getOrThrow(JsonParseException::new); // Paper - use RegistryOps
         if (nms != null) {
             final com.google.common.collect.ImmutableMap.Builder<ResourceLocation, AdvancementHolder> mapBuilder = com.google.common.collect.ImmutableMap.builder();
-            mapBuilder.putAll(MinecraftServer.getServer().getAdvancements().advancements);
+            mapBuilder.putAll(MinecraftServer.getServer().theGame().getAdvancements().advancements);
 
             final AdvancementHolder holder = new AdvancementHolder(resourceKey, nms);
             mapBuilder.put(resourceKey, holder);
 
-            MinecraftServer.getServer().getAdvancements().advancements = mapBuilder.build();
-            final net.minecraft.advancements.AdvancementTree tree = MinecraftServer.getServer().getAdvancements().tree();
+            MinecraftServer.getServer().theGame().getAdvancements().advancements = mapBuilder.build();
+            final net.minecraft.advancements.AdvancementTree tree = MinecraftServer.getServer().theGame().getAdvancements().tree();
             tree.addAll(java.util.List.of(holder));
 
             // recalculate advancement position
@@ -336,8 +336,8 @@ public final class CraftMagicNumbers implements UnsafeValues {
                     Bukkit.getLogger().log(Level.SEVERE, "Error saving advancement " + key, ex);
                 }
 
-                MinecraftServer.getServer().getPlayerList().getPlayers().forEach(player -> {
-                    player.getAdvancements().reload(MinecraftServer.getServer().getAdvancements());
+                MinecraftServer.getServer().theGame().playerList().getPlayers().forEach(player -> {
+                    player.getAdvancements().reload(MinecraftServer.getServer().theGame().getAdvancements());
                     player.getAdvancements().flushDirty(player, false);
                 });
 
@@ -487,7 +487,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
         Preconditions.checkNotNull(item, "null cannot be serialized");
         Preconditions.checkArgument(item.getType() != Material.AIR, "air cannot be serialized");
 
-        return serializeNbtToBytes((CompoundTag) (item instanceof CraftItemStack ? ((CraftItemStack) item).handle : CraftItemStack.asNMSCopy(item)).save(MinecraftServer.getServer().registryAccess()));
+        return serializeNbtToBytes((CompoundTag) (item instanceof CraftItemStack ? ((CraftItemStack) item).handle : CraftItemStack.asNMSCopy(item)).save(MinecraftServer.getServer().theGame().registryAccess()));
     }
 
     @Override
@@ -498,7 +498,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
         CompoundTag compound = deserializeNbtFromBytes(data);
         final int dataVersion = compound.getIntOr("DataVersion", 0);
         compound = PlatformHooks.get().convertNBT(References.ITEM_STACK, MinecraftServer.getServer().fixerUpper, compound, dataVersion, this.getDataVersion()); // Paper - possibly use dataconverter
-        return CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.parse(MinecraftServer.getServer().registryAccess(), compound).orElseThrow());
+        return CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.parse(MinecraftServer.getServer().theGame().registryAccess(), compound).orElseThrow());
     }
 
     @Override
@@ -506,7 +506,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
         Preconditions.checkNotNull(itemStack, "Cannot serialize empty ItemStack");
         Preconditions.checkArgument(!itemStack.isEmpty(), "Cannot serialize empty ItemStack");
 
-        net.minecraft.core.RegistryAccess.Frozen reg = net.minecraft.server.MinecraftServer.getServer().registryAccess();
+        net.minecraft.core.RegistryAccess.Frozen reg = net.minecraft.server.MinecraftServer.getServer().theGame().registryAccess();
         com.mojang.serialization.DynamicOps<com.google.gson.JsonElement> ops = reg.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
         com.google.gson.JsonObject item;
         // Serialize as SNBT to preserve exact NBT types; vanilla codecs already can handle such deserialization.
@@ -527,7 +527,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
         final int dataVersion = data.get("DataVersion").getAsInt();
         final int currentVersion = org.bukkit.craftbukkit.util.CraftMagicNumbers.INSTANCE.getDataVersion();
         data = (com.google.gson.JsonObject) MinecraftServer.getServer().fixerUpper.update(References.ITEM_STACK, new Dynamic<>(com.mojang.serialization.JsonOps.INSTANCE, data), dataVersion, currentVersion).getValue();
-        com.mojang.serialization.DynamicOps<com.google.gson.JsonElement> ops = MinecraftServer.getServer().registryAccess().createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
+        com.mojang.serialization.DynamicOps<com.google.gson.JsonElement> ops = MinecraftServer.getServer().theGame().registryAccess().createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
         return CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.CODEC.parse(ops, data).getOrThrow(IllegalArgumentException::new));
     }
 

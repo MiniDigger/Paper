@@ -1,0 +1,55 @@
+--- a/net/minecraft/world/level/mines/WorldEffects.java
++++ b/net/minecraft/world/level/mines/WorldEffects.java
+@@ -800,9 +_,9 @@
+         .withNameStyle(CHALLENGE_STYLE)
+         .onMineEnter(serverLevel -> {
+             serverLevel.theGame().overworld().setDayTime(18000L);
+-            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, serverLevel.theGame());
++            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, serverLevel);
+         })
+-        .onMineLeave(serverLevel -> serverLevel.theGame().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, serverLevel.theGame()))
++        .onMineLeave(serverLevel -> serverLevel.theGame().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, serverLevel))
+         .incompatibleWith(CAVE_WORLD, DARK_CAVE_WORLD)
+         .xpModifier(5.0F)
+         .requiresUnlockCount(20)
+@@ -812,11 +_,11 @@
+         .withNameStyle(CHALLENGE_STYLE)
+         .onMineEnter(serverLevel -> {
+             serverLevel.setRainLevel(1.0F);
+-            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, serverLevel.theGame());
++            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, serverLevel);
+         })
+         .onMineLeave(serverLevel -> {
+             serverLevel.setRainLevel(0.0F);
+-            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(true, serverLevel.theGame());
++            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(true, serverLevel);
+         })
+         .unlockedBy(UnlockCondition.mineCompletedWith(true, ETERNAL_NIGHT))
+         .incompatibleWith(CAVE_WORLD, DARK_CAVE_WORLD)
+@@ -828,12 +_,12 @@
+         .onMineEnter(serverLevel -> {
+             serverLevel.setThunderLevel(1.0F);
+             serverLevel.setRainLevel(1.0F);
+-            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, serverLevel.theGame());
++            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, serverLevel);
+         })
+         .onMineLeave(serverLevel -> {
+             serverLevel.setThunderLevel(0.0F);
+             serverLevel.setRainLevel(0.0F);
+-            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(true, serverLevel.theGame());
++            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(true, serverLevel);
+         })
+         .unlockedBy(UnlockCondition.mineCompletedWith(true, ETERNAL_RAIN))
+         .incompatibleWith(CAVE_WORLD, DARK_CAVE_WORLD)
+@@ -886,9 +_,9 @@
+     public static final WorldEffect KUIPER_WORLD = WorldEffect.builder("kuiper_world")
+         .onMineEnter(serverLevel -> {
+             serverLevel.theGame().overworld().setDayTime(18000L);
+-            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, serverLevel.theGame());
++            serverLevel.theGame().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, serverLevel);
+         })
+-        .onMineLeave(serverLevel -> serverLevel.theGame().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, serverLevel.theGame()))
++        .onMineLeave(serverLevel -> serverLevel.theGame().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, serverLevel))
+         .modifyingWorldGen(
+             worldGenBuilder -> worldGenBuilder.withCustomChunkGenerator(
+                 (provider, biomeSource, holder) -> {

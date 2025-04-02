@@ -157,7 +157,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
             return null;
         }
 
-        net.minecraft.server.level.ServerLevel level = ((ServerPlayer) this.getHandle()).server.getLevel(respawnConfig.dimension());
+        net.minecraft.server.level.ServerLevel level = ((ServerPlayer) this.getHandle()).theGame().getLevel(respawnConfig.dimension());
         if (level == null) {
             return null;
         }
@@ -733,7 +733,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
 
     private Collection<RecipeHolder<?>> bukkitKeysToMinecraftRecipes(Collection<NamespacedKey> recipeKeys) {
         Collection<RecipeHolder<?>> recipes = new ArrayList<>();
-        RecipeManager manager = this.getHandle().level().getServer().getRecipeManager();
+        RecipeManager manager = this.getHandle().level().theGame().getRecipeManager();
 
         for (NamespacedKey recipeKey : recipeKeys) {
             Optional<? extends RecipeHolder<?>> recipe = manager.byKey(CraftRecipe.toMinecraft(recipeKey));

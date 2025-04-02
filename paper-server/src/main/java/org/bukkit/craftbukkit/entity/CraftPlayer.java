@@ -720,7 +720,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void sendOpLevel(byte level) {
         Preconditions.checkArgument(level >= Commands.LEVEL_ALL && level <= Commands.LEVEL_OWNERS, "Level must be within [%s, %s]", Commands.LEVEL_ALL, Commands.LEVEL_OWNERS);
 
-        this.getHandle().getServer().getPlayerList().sendPlayerPermissionLevel(this.getHandle(), level, false);
+        this.getHandle().theGame().playerList().sendPlayerPermissionLevel(this.getHandle(), level, false);
     }
 
     @Override
@@ -1545,7 +1545,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         final ServerPlayer.RespawnConfig respawnConfig = this.getHandle().getRespawnConfig();
         if (respawnConfig == null) return null;
 
-        ServerLevel world = this.getHandle().server.getLevel(respawnConfig.dimension());
+        ServerLevel world = this.getHandle().theGame().getLevel(respawnConfig.dimension());
         if (world != null) {
             Optional<ServerPlayer.RespawnPosAngle> spawnLoc = ServerPlayer.findRespawnAndUseSpawnBlock(world, respawnConfig, true);
             if (spawnLoc.isPresent()) {
@@ -2173,7 +2173,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             self.gameProfile = gameProfile;
             return;
         }
-        List<ServerPlayer> players = this.server.getServer().getPlayerList().players;
+        List<ServerPlayer> players = this.server.getServer().theGame().playerList().players;
         // First unregister the player for all players with the OLD game profile
         for (ServerPlayer player : players) {
             CraftPlayer bukkitPlayer = player.getBukkitEntity();
@@ -2223,7 +2223,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         connection.send(new net.minecraft.network.protocol.game.ClientboundRespawnPacket(handle.createCommonSpawnInfo(level), net.minecraft.network.protocol.game.ClientboundRespawnPacket.KEEP_ALL_DATA));
         handle.onUpdateAbilities();
         connection.internalTeleport(net.minecraft.world.entity.PositionMoveRotation.of(this.getHandle()), java.util.Collections.emptySet());
-        net.minecraft.server.players.PlayerList playerList = handle.server.getPlayerList();
+        net.minecraft.server.players.PlayerList playerList = handle.theGame().playerList();
         playerList.sendPlayerPermissionLevel(handle, false);
         playerList.sendLevelInfo(handle, level);
         playerList.sendAllPlayerInfo(handle);
@@ -3024,7 +3024,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void updateCommands() {
         if (this.getHandle().connection == null) return;
 
-        this.getHandle().server.getCommands().sendCommands(this.getHandle());
+        this.getHandle().theGame().getCommands().sendCommands(this.getHandle());
     }
 
     @Override
@@ -3328,7 +3328,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         @Override
         public void respawn() {
             if (CraftPlayer.this.getHealth() <= 0 && CraftPlayer.this.isOnline()) {
-                CraftPlayer.this.server.getServer().getPlayerList().respawn(CraftPlayer.this.getHandle(), false, Entity.RemovalReason.KILLED, org.bukkit.event.player.PlayerRespawnEvent.RespawnReason.PLUGIN);
+                CraftPlayer.this.server.getServer().theGame().playerList().respawn(CraftPlayer.this.getHandle(), false, Entity.RemovalReason.KILLED, org.bukkit.event.player.PlayerRespawnEvent.RespawnReason.PLUGIN);
             }
         }
 

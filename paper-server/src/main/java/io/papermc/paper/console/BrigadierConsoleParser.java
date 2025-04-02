@@ -24,7 +24,7 @@ public class BrigadierConsoleParser implements Parser {
 
     @Override
     public ParsedLine parse(final String line, final int cursor, final ParseContext context) throws SyntaxError {
-        final ParseResults<CommandSourceStack> results = this.server.getCommands().getDispatcher().parse(new StringReader(line), this.server.createCommandSourceStack());
+        final ParseResults<CommandSourceStack> results = this.server.theGame().getCommands().getDispatcher().parse(new StringReader(line), this.server.theGame().createCommandSourceStack());
         final ImmutableStringReader reader = results.getReader();
         final List<String> words = new ArrayList<>();
         CommandContextBuilder<CommandSourceStack> currentContext = results.getContext();

@@ -19,6 +19,6 @@ public class CraftComplexRecipe extends CraftingRecipe implements CraftRecipe, C
 
     @Override
     public void addToCraftingManager() {
-        MinecraftServer.getServer().getRecipeManager().addRecipe(new RecipeHolder<>(CraftRecipe.toMinecraft(this.getKey()), this.recipe));
+        MinecraftServer.getServer().theGame().getRecipeManager().addRecipe(new RecipeHolder<>(CraftRecipe.toMinecraft(this.getKey()), this.recipe));
     }
 }

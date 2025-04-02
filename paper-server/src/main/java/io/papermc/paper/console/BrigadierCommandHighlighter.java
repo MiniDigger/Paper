@@ -23,17 +23,17 @@ public final class BrigadierCommandHighlighter implements Highlighter {
 
     public BrigadierCommandHighlighter(final @NonNull DedicatedServer server) {
         this.server = server;
-        this.commandSourceStack = Suppliers.memoize(this.server::createCommandSourceStack);
+        this.commandSourceStack = Suppliers.memoize(this.server.theGame()::createCommandSourceStack);
     }
 
     @Override
     public AttributedString highlight(final @NonNull LineReader reader, final @NonNull String buffer) {
         //noinspection ConstantConditions
-        if (this.server.overworld() == null) { // check if overworld is null, as worlds haven't been loaded yet
+        if (this.server.theGame().overworld() == null) { // check if overworld is null, as worlds haven't been loaded yet
             return new AttributedString(buffer, AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
         }
         final AttributedStringBuilder builder = new AttributedStringBuilder();
-        final ParseResults<CommandSourceStack> results = this.server.getCommands().getDispatcher().parse(new StringReader(buffer), this.commandSourceStack.get());
+        final ParseResults<CommandSourceStack> results = this.server.theGame().getCommands().getDispatcher().parse(new StringReader(buffer), this.commandSourceStack.get());
         int pos = 0;
         int component = -1;
         for (final ParsedCommandNode<CommandSourceStack> node : results.getContext().getLastChild().getNodes()) {

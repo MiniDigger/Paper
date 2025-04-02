@@ -30,18 +30,18 @@ public final class BrigadierCommandCompleter {
 
     public BrigadierCommandCompleter(final @NonNull DedicatedServer server) {
         this.server = server;
-        this.commandSourceStack = Suppliers.memoize(this.server::createCommandSourceStack);
+        this.commandSourceStack = Suppliers.memoize(this.server.theGame()::createCommandSourceStack);
     }
 
     public void complete(final @NonNull LineReader reader, final @NonNull ParsedLine line, final @NonNull List<Candidate> candidates, final @NonNull List<Completion> existing) {
         //noinspection ConstantConditions
-        if (this.server.overworld() == null) { // check if overworld is null, as worlds haven't been loaded yet
+        if (this.server.theGame().overworld() == null) { // check if overworld is null, as worlds haven't been loaded yet
             return;
         } else if (!io.papermc.paper.configuration.GlobalConfiguration.get().console.enableBrigadierCompletions) {
             this.addCandidates(candidates, Collections.emptyList(), existing, new ParseContext(line.line(), 0));
             return;
         }
-        final CommandDispatcher<CommandSourceStack> dispatcher = this.server.getCommands().getDispatcher();
+        final CommandDispatcher<CommandSourceStack> dispatcher = this.server.theGame().getCommands().getDispatcher();
         final ParseResults<CommandSourceStack> results = dispatcher.parse(new StringReader(line.line()), this.commandSourceStack.get());
         this.addCandidates(
             candidates,

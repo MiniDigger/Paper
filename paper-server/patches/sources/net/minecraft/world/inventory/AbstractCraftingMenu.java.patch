@@ -15,7 +15,7 @@
          this.height = height;
 -        this.craftSlots = new TransientCraftingContainer(this, width, height);
 +        // CraftBukkit start
-+        this.craftSlots = new TransientCraftingContainer(this, width, height, playerInventory.player);
++        this.craftSlots = new TransientCraftingContainer(this, width, height, playerInventory.getPlayer());
 +        this.craftSlots.resultInventory = this.resultSlots; // let InventoryCrafting know about its result slot
 +        // CraftBukkit end
      }
