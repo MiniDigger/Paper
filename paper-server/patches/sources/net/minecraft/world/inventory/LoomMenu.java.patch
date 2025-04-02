@@ -1,14 +1,6 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/world/inventory/LoomMenu.java b/net/minecraft/world/inventory/LoomMenu.java
-index 9a34e3d532aa70579468a283f8f902514d62f233..07c60649e22b193d81ea10c79566b4df881e2280 100644
 --- a/net/minecraft/world/inventory/LoomMenu.java
 +++ b/net/minecraft/world/inventory/LoomMenu.java
-@@ -38,21 +38,23 @@ public class LoomMenu extends AbstractContainerMenu {
+@@ -38,21 +_,23 @@
      private final Slot patternSlot;
      private final Slot resultSlot;
      long lastSoundTime;
@@ -25,6 +17,8 @@ index 9a34e3d532aa70579468a283f8f902514d62f233..07c60649e22b193d81ea10c79566b4df
 -        public void setChanged() {
 -            super.setChanged();
 -            LoomMenu.this.slotUpdateListener.run();
+-        }
+-    };
 +    private final Container inputContainer; // Paper - Add missing InventoryHolders - move down
 +    private final Container outputContainer; // Paper - Add missing InventoryHolders - move down
 +    // CraftBukkit start
@@ -35,8 +29,7 @@ index 9a34e3d532aa70579468a283f8f902514d62f233..07c60649e22b193d81ea10c79566b4df
 +    public org.bukkit.craftbukkit.inventory.view.CraftLoomView getBukkitView() {
 +        if (this.view != null) {
 +            return this.view;
-         }
--    };
++        }
 +
 +        org.bukkit.craftbukkit.inventory.CraftInventoryLoom inventory = new org.bukkit.craftbukkit.inventory.CraftInventoryLoom(this.inputContainer, this.outputContainer);
 +        this.view = new org.bukkit.craftbukkit.inventory.view.CraftLoomView(this.player, inventory, this);
@@ -44,9 +37,9 @@ index 9a34e3d532aa70579468a283f8f902514d62f233..07c60649e22b193d81ea10c79566b4df
 +    }
 +    // CraftBukkit end
  
-     public LoomMenu(int containerId, Inventory playerInventory) {
+     public LoomMenu(int containerId, Inventory playerInventory, List<Integer> list) {
          this(containerId, playerInventory, ContainerLevelAccess.NULL);
-@@ -61,6 +63,28 @@ public class LoomMenu extends AbstractContainerMenu {
+@@ -61,6 +_,28 @@
      public LoomMenu(int containerId, Inventory playerInventory, final ContainerLevelAccess access) {
          super(MenuType.LOOM, containerId);
          this.access = access;
@@ -75,11 +68,11 @@ index 9a34e3d532aa70579468a283f8f902514d62f233..07c60649e22b193d81ea10c79566b4df
          this.bannerSlot = this.addSlot(new Slot(this.inputContainer, 0, 13, 26) {
              @Override
              public boolean mayPlace(ItemStack stack) {
-@@ -106,18 +130,44 @@ public class LoomMenu extends AbstractContainerMenu {
+@@ -106,18 +_,44 @@
          this.addStandardInventorySlots(playerInventory, 8, 84);
          this.addDataSlot(this.selectedBannerPatternIndex);
-         this.patternGetter = playerInventory.player.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN);
-+        this.player = (org.bukkit.entity.Player) playerInventory.player.getBukkitEntity(); // CraftBukkit
+         this.patternGetter = playerInventory.getPlayer().registryAccess().lookupOrThrow(Registries.BANNER_PATTERN);
++        this.player = (org.bukkit.entity.Player) playerInventory.getPlayer().getBukkitEntity(); // CraftBukkit
      }
  
      @Override
@@ -122,7 +115,7 @@ index 9a34e3d532aa70579468a283f8f902514d62f233..07c60649e22b193d81ea10c79566b4df
              return true;
          } else {
              return false;
-@@ -181,7 +231,8 @@ public class LoomMenu extends AbstractContainerMenu {
+@@ -181,7 +_,8 @@
                  this.resultSlot.set(ItemStack.EMPTY);
              }
  
@@ -132,7 +125,7 @@ index 9a34e3d532aa70579468a283f8f902514d62f233..07c60649e22b193d81ea10c79566b4df
          } else {
              this.resultSlot.set(ItemStack.EMPTY);
              this.selectablePatterns = List.of();
-@@ -270,7 +321,14 @@ public class LoomMenu extends AbstractContainerMenu {
+@@ -270,7 +_,14 @@
              itemStack.update(
                  DataComponents.BANNER_PATTERNS,
                  BannerPatternLayers.EMPTY,

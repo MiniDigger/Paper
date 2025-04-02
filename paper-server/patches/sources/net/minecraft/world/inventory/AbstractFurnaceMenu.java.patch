@@ -1,20 +1,11 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/world/inventory/AbstractFurnaceMenu.java b/net/minecraft/world/inventory/AbstractFurnaceMenu.java
-index 8eaebeb0f00ddd3293ff170b6bd8399238c73271..b42d55c1c0c405ce3ce073138343e74fa036fa65 100644
 --- a/net/minecraft/world/inventory/AbstractFurnaceMenu.java
 +++ b/net/minecraft/world/inventory/AbstractFurnaceMenu.java
-@@ -34,6 +34,21 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
-     private final RecipeType<? extends AbstractCookingRecipe> recipeType;
+@@ -36,6 +_,20 @@
      private final RecipePropertySet acceptedInputs;
      private final RecipeBookType recipeBookType;
+     private final Inventory inventory;
 +    // CraftBukkit start
 +    private @javax.annotation.Nullable org.bukkit.craftbukkit.inventory.view.CraftFurnaceView view = null;
-+    private final Inventory inventory;
 +
 +    @Override
 +    public org.bukkit.craftbukkit.inventory.view.CraftFurnaceView getBukkitView() {
@@ -30,15 +21,7 @@ index 8eaebeb0f00ddd3293ff170b6bd8399238c73271..b42d55c1c0c405ce3ce073138343e74f
  
      protected AbstractFurnaceMenu(
          MenuType<?> menuType,
-@@ -68,6 +83,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
-         this.addSlot(new Slot(container, 0, 56, 17));
-         this.addSlot(new FurnaceFuelSlot(this, container, 1, 56, 53));
-         this.addSlot(new FurnaceResultSlot(inventory.player, container, 2, 116, 35));
-+        this.inventory = inventory; // CraftBukkit
-         this.addStandardInventorySlots(inventory, 8, 84);
-         this.addDataSlots(data);
-     }
-@@ -85,6 +101,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
+@@ -100,6 +_,7 @@
  
      @Override
      public boolean stillValid(Player player) {

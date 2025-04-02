@@ -1,20 +1,12 @@
-From aa3795bc1d3471d257cbf8fd09384aad897bf348 Mon Sep 17 00:00:00 2001
-From: File <noreply+automated@papermc.io>
-Date: Sun, 20 Apr 1997 15:37:42 +0200
-Subject: [PATCH] paper File Patches
-
-
-diff --git a/net/minecraft/world/inventory/CraftingMenu.java b/net/minecraft/world/inventory/CraftingMenu.java
-index 00298dbb26c88e4432e15707b1447353bd1d0ac6..a8e89e674624ac292fe5ffcd0ea3ca8e0ec965c4 100644
 --- a/net/minecraft/world/inventory/CraftingMenu.java
 +++ b/net/minecraft/world/inventory/CraftingMenu.java
-@@ -30,13 +30,14 @@ public class CraftingMenu extends AbstractCraftingMenu {
+@@ -30,13 +_,14 @@
      public final ContainerLevelAccess access;
      private final Player player;
      private boolean placingRecipe;
 +    private @Nullable org.bukkit.craftbukkit.inventory.CraftInventoryView view = null; // CraftBukkit
  
-     public CraftingMenu(int containerId, Inventory playerInventory) {
+     public CraftingMenu(int containerId, Inventory playerInventory, List<Integer> list) {
          this(containerId, playerInventory, ContainerLevelAccess.NULL);
      }
  
@@ -22,9 +14,9 @@ index 00298dbb26c88e4432e15707b1447353bd1d0ac6..a8e89e674624ac292fe5ffcd0ea3ca8e
 -        super(MenuType.CRAFTING, containerId, 3, 3);
 +        super(MenuType.CRAFTING, containerId, 3, 3, playerInventory); // CraftBukkit - pass player
          this.access = access;
-         this.player = playerInventory.player;
+         this.player = playerInventory.getPlayer();
          this.addResultSlot(this.player, 124, 35);
-@@ -55,7 +56,32 @@ public class CraftingMenu extends AbstractCraftingMenu {
+@@ -55,7 +_,32 @@
          CraftingInput craftInput = craftSlots.asCraftInput();
          ServerPlayer serverPlayer = (ServerPlayer)player;
          ItemStack itemStack = ItemStack.EMPTY;
@@ -52,12 +44,12 @@ index 00298dbb26c88e4432e15707b1447353bd1d0ac6..a8e89e674624ac292fe5ffcd0ea3ca8e
 +            recipe = craftSlots.getCurrentRecipe();
 +        }
 +        // Paper end - Perf: Improve mass crafting; check last recipe used first
-         Optional<RecipeHolder<CraftingRecipe>> recipeFor = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftInput, level, recipe);
+         Optional<RecipeHolder<CraftingRecipe>> recipeFor = level.theGame().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftInput, level, recipe);
 +        craftSlots.setCurrentRecipe(recipeFor.orElse(null)); // CraftBukkit
          if (recipeFor.isPresent()) {
              RecipeHolder<CraftingRecipe> recipeHolder = recipeFor.get();
              CraftingRecipe craftingRecipe = recipeHolder.value();
-@@ -66,6 +92,7 @@ public class CraftingMenu extends AbstractCraftingMenu {
+@@ -66,6 +_,7 @@
                  }
              }
          }
@@ -65,7 +57,7 @@ index 00298dbb26c88e4432e15707b1447353bd1d0ac6..a8e89e674624ac292fe5ffcd0ea3ca8e
  
          resultSlots.setItem(0, itemStack);
          menu.setRemoteSlot(0, itemStack);
-@@ -102,6 +129,7 @@ public class CraftingMenu extends AbstractCraftingMenu {
+@@ -102,6 +_,7 @@
  
      @Override
      public boolean stillValid(Player player) {
@@ -73,7 +65,7 @@ index 00298dbb26c88e4432e15707b1447353bd1d0ac6..a8e89e674624ac292fe5ffcd0ea3ca8e
          return stillValid(this.access, player, Blocks.CRAFTING_TABLE);
      }
  
-@@ -176,4 +204,17 @@ public class CraftingMenu extends AbstractCraftingMenu {
+@@ -176,4 +_,17 @@
      protected Player owner() {
          return this.player;
      }
