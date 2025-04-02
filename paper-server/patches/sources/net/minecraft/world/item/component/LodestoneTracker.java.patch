@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/item/component/LodestoneTracker.java
++++ b/net/minecraft/world/item/component/LodestoneTracker.java
+@@ -47,7 +_,7 @@
+                     if (exitTracker != null) {
+                         return exitTracker;
+                     }
+-                } else if (!serverLevel.isInWorldBounds(blockPos1) || !serverLevel.getPoiManager().existsAtPosition(PoiTypes.LODESTONE, blockPos1)) {
++                } else if (!serverLevel.isInWorldBounds(blockPos1) || (serverLevel.hasChunkAt(blockPos) && !serverLevel.getPoiManager().existsAtPosition(PoiTypes.LODESTONE, blockPos1))) { // Paper - Prevent compass from loading chunks
+                     return new LodestoneTracker(Optional.empty(), true, this.exits);
+                 }
+ 
