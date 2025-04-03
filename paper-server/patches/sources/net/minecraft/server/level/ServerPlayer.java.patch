@@ -255,6 +255,15 @@
              this.containerMenu = this.inventoryMenu;
          }
  
+@@ -699,7 +_,7 @@
+         this.updatePlayerAttributes();
+         if (this.onGround() && serverLevel.isActive(WorldEffects.EXPLOSIVE_TRAPS) && this.random.nextInt(400) == 0) {
+             BlockPos blockPos = this.blockPosition().below();
+-            if (TntBlock.prime(this.level(), blockPos, null, 40)) {
++            if (TntBlock.prime(this.level(), blockPos)) { // Paper
+                 serverLevel.removeBlock(blockPos, false);
+             }
+         }
 @@ -799,7 +_,7 @@
  
      public void doTick() {

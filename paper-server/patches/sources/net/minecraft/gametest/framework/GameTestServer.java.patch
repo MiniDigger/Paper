@@ -5,26 +5,31 @@
  
      private GameTestServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, Optional<String> optional, boolean flag) {
 -        super(thread, levelStorageAccess, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES);
-+        super(null, null, thread, levelStorageAccess, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES); // paper
++        super(null, null, thread, levelStorageAccess, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES); // Paper
          this.testSelection = optional;
          this.verify = flag;
      }
-@@ -144,6 +_,15 @@
+@@ -137,12 +_,19 @@
+     @Override
+     public TheGame initGame(PackRepository packRepository, WorldStem worldStem, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+         TheGame theGame = TheGame.create(
++            "blah", // Paper
+             this,
+             packRepository,
+             worldStem,
+             this.storageSource,
              chunkProgressListenerFactory,
-             theGame1 -> new PlayerList(theGame1, this.playerDataStorage, 1) {}
-         );
-+        // Paper start
-+        this.setPlayerList(new PlayerList(this, this.registries(), this.playerDataStorage, 1) {
-+            @Override
-+            public void loadAndSaveFiles() {
-+                throw new UnsupportedOperationException("Should not be called in a GameTestServer");
+-            theGame1 -> new PlayerList(theGame1, this.playerDataStorage, 1) {}
++            // Paper start
++            theGame1 -> new PlayerList(theGame1, this.playerDataStorage, 1) {
++                public void loadAndSaveFiles() {
++                    throw new UnsupportedOperationException("Should not be called in a GameTestServer");
++                }
 +            }
-+        });
-+        this.loadLevel("blah");
-+        // Paper end
++            // Paper end
+         );
          ServerLevel serverLevel = theGame.overworld();
          this.testBatches = this.evaluateTestsToRun(serverLevel);
-         LOGGER.info("Started game test server");
 @@ -327,6 +_,13 @@
      public boolean shouldInformAdmins() {
          return false;

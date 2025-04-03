@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.inventory.util;
 
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+import java.util.List;
+import net.minecraft.network.protocol.game.ClientboundOpenWindowPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.inventory.MerchantMenu;
@@ -63,7 +64,7 @@ public final class CraftMenus {
 
         minecraftMerchant.setTradingPlayer(player);
 
-        player.connection.send(new ClientboundOpenScreenPacket(merchant.containerId, net.minecraft.world.inventory.MenuType.MERCHANT, merchant.getTitle()));
+        player.connection.send(new ClientboundOpenWindowPacket(merchant.containerId, net.minecraft.world.inventory.MenuType.MERCHANT, merchant.getTitle(), List.of()));
         player.containerMenu = merchant;
         player.initMenu(merchant);
 

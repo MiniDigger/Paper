@@ -1,7 +1,11 @@
 --- a/net/minecraft/server/network/ServerCommonPacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerCommonPacketListenerImpl.java
-@@ -14,14 +_,57 @@
- public abstract class ServerCommonPacketListenerImpl extends ServerLessCommonPacketListenerImpl {
+@@ -11,17 +_,60 @@
+ import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
+ import net.minecraft.server.TheGame;
+ 
+-public abstract class ServerCommonPacketListenerImpl extends ServerLessCommonPacketListenerImpl {
++public abstract class ServerCommonPacketListenerImpl extends ServerLessCommonPacketListenerImpl implements org.bukkit.craftbukkit.entity.CraftPlayer.TransferCookieConnection { // CraftBukkit
      protected final TheGame theGame;
      private volatile boolean suspendFlushingOnServerThread = false;
 +    // CraftBukkit start

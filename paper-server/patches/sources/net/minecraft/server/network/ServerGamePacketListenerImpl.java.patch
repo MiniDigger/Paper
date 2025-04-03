@@ -2578,6 +2578,15 @@
                  }
              }
          }
+@@ -2041,7 +_,7 @@
+             this.connection
+                 .setupInboundProtocol(
+                     ConfigurationProtocols.SERVERBOUND,
+-                    new ServerHibernateConfigPacketListenerImpl(this.connection, this.createCookie(this.player.clientInformation()), this.theGame.eventLoop())
++                    new ServerHibernateConfigPacketListenerImpl(this.connection, this.createCookie(this.player.clientInformation()), this.theGame.eventLoop(), this.player)
+                 );
+         }
+     }
 @@ -2060,6 +_,7 @@
  
      private void resetPlayerChatState(RemoteChatSession chatSession) {

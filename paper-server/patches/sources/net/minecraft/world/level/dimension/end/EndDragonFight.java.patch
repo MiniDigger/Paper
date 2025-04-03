@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/dimension/end/EndDragonFight.java
 +++ b/net/minecraft/world/level/dimension/end/EndDragonFight.java
-@@ -61,8 +_,9 @@
+@@ -61,13 +_,15 @@
      private static final int GATEWAY_DISTANCE = 96;
      public static final int DRAGON_SPAWN_Y = 128;
      private final Predicate<Entity> validPlayer;
@@ -11,7 +11,13 @@
          )
          .setPlayBossMusic(true)
          .setCreateWorldFog(true);
-@@ -102,7 +_,12 @@
+     public final ServerLevel level;
+     private final BlockPos origin;
++    public final it.unimi.dsi.fastutil.objects.ObjectArrayList<Integer> gateways = new it.unimi.dsi.fastutil.objects.ObjectArrayList<>(); // Paper - add back gateways
+     private final BlockPattern exitPortalPattern;
+     private int ticksSinceDragonSeen;
+     private int crystalsAlive;
+@@ -102,8 +_,19 @@
          if (data.isRespawning) {
              this.respawnStage = DragonRespawnAnimation.START;
          }
@@ -23,7 +29,14 @@
 +        }
 +        // Paper end - Add config to disable ender dragon legacy check
          this.portalLocation = data.exitPortalLocation.orElse(null);
++        // Paper - don't add nonexistent gateways
++        //this.gateways.addAll(data.gateways.orElseGet(() -> {
++        //   it.unimi.dsi.fastutil.objects.ObjectArrayList<Integer> list = new it.unimi.dsi.fastutil.objects.ObjectArrayList<>(com.google.common.collect.ContiguousSet.create(com.google.common.collect.Range.closedOpen(0, 20), com.google.common.collect.DiscreteDomain.integers()));
++        //   net.minecraft.Util.shuffle(list, RandomSource.create(seed));
++        //   return list;
++        //}));
          this.exitPortalPattern = BlockPatternBuilder.start()
+             .aisle("       ", "       ", "       ", "   #   ", "       ", "       ", "       ")
              .aisle("       ", "       ", "       ", "   #   ", "       ", "       ", "       ")
 @@ -193,9 +_,9 @@
              this.dragonUUID = enderDragon.getUUID();
@@ -37,7 +50,7 @@
                  this.dragonUUID = null;
              }
          }
-@@ -308,18 +_,38 @@
+@@ -308,18 +_,66 @@
              this.dragonEvent.setProgress(0.0F);
              this.dragonEvent.setVisible(false);
              this.spawnExitPortal(true);
@@ -71,6 +84,14 @@
      }
 +
 +    // Paper start - More DragonBattle API
++    public boolean spawnNewGatewayIfPossible() {
++        if (!this.gateways.isEmpty()) {
++            this.spawnNewGateway();
++            return true;
++        }
++        return false;
++    }
++
 +    public List<EndCrystal> getSpikeCrystals() {
 +        final List<EndCrystal> endCrystals = new java.util.ArrayList<>();
 +        for (final SpikeFeature.EndSpike spike : SpikeFeature.getSpikesForLevel(this.level)) {
@@ -79,6 +100,26 @@
 +        return endCrystals;
 +    }
 +    // Paper end - More DragonBattle API
++
++    // Paper start - add back gateway methods
++    private void spawnNewGateway() {
++        if (!this.gateways.isEmpty()) {
++            int i = this.gateways.remove(this.gateways.size() - 1);
++            int floor = Mth.floor(96.0 * Math.cos(2.0 * (-Math.PI + (Math.PI / 20) * i)));
++            int floor1 = Mth.floor(96.0 * Math.sin(2.0 * (-Math.PI + (Math.PI / 20) * i)));
++            this.spawnNewGateway(new BlockPos(floor, 75, floor1));
++        }
++    }
++
++    public void spawnNewGateway(BlockPos pos) {
++        this.level.levelEvent(3000, pos, 0);
++        this.level
++            .registryAccess()
++            .lookup(net.minecraft.core.registries.Registries.CONFIGURED_FEATURE)
++            .flatMap(registry -> registry.get(net.minecraft.data.worldgen.features.EndFeatures.END_GATEWAY_DELAYED))
++            .ifPresent(endGatewayFeature -> endGatewayFeature.value().place(this.level, this.level.getChunkSource().getGenerator(), RandomSource.create(), pos));
++    }
++    // Paper end - add back gateway methods
  
      public BlockPos spawnExitPortal(boolean flag) {
          if (this.portalLocation == null) {

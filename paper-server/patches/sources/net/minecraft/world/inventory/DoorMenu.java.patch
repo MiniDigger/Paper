@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/inventory/DoorMenu.java
++++ b/net/minecraft/world/inventory/DoorMenu.java
+@@ -161,6 +_,13 @@
+     }
+ 
+     @Override
++    // Paper start
++    public org.bukkit.inventory.InventoryView getBukkitView() {
++        return null; // TODO: implement later
++    }
++
++    @Override
++    // Paper end
+     public boolean clickMenuButton(Player player, int id) {
+         int size = this.displays.size();
+         if (size == 0) {

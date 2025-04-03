@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.inventory.view.builder;
 
+import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -22,7 +23,7 @@ public class CraftDoubleChestInventoryViewBuilder<V extends InventoryView> exten
     @Override
     protected AbstractContainerMenu buildContainer(final ServerPlayer player) {
         if (super.world == null) {
-            return handle.create(player.nextContainerCounter(), player.getInventory());
+            return handle.create(player.nextContainerCounter(), player.getInventory(), List.of());
         }
 
         final ChestBlock chest = (ChestBlock) Blocks.CHEST;
@@ -30,12 +31,12 @@ public class CraftDoubleChestInventoryViewBuilder<V extends InventoryView> exten
             super.world.getBlockState(super.position), super.world, super.position, false
         );
         if (result instanceof DoubleBlockCombiner.NeighborCombineResult.Single<? extends ChestBlockEntity>) {
-            return handle.create(player.nextContainerCounter(), player.getInventory());
+            return handle.create(player.nextContainerCounter(), player.getInventory(), List.of());
         }
 
         final MenuProvider combined = result.apply(ChestBlock.MENU_PROVIDER_COMBINER).orElse(null);
         if (combined == null) {
-            return handle.create(player.nextContainerCounter(), player.getInventory());
+            return handle.create(player.nextContainerCounter(), player.getInventory(), List.of());
         }
 
         return combined.createMenu(player.nextContainerCounter(), player.getInventory(), player);
