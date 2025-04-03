@@ -1,6 +1,6 @@
 --- a/net/minecraft/gametest/framework/GameTestServer.java
 +++ b/net/minecraft/gametest/framework/GameTestServer.java
-@@ -124,7 +_,7 @@
+@@ -124,25 +_,32 @@
      }
  
      private GameTestServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, Optional<String> optional, boolean flag) {
@@ -9,7 +9,13 @@
          this.testSelection = optional;
          this.verify = flag;
      }
-@@ -137,12 +_,19 @@
+ 
+     @Override
+-    public boolean initServer() {
++    public boolean initServer(final PackRepository packRepository, final WorldStem worldStem, final ChunkProgressListenerFactory chunkProgressListenerFactory) {
+         return true;
+     }
+ 
      @Override
      public TheGame initGame(PackRepository packRepository, WorldStem worldStem, ChunkProgressListenerFactory chunkProgressListenerFactory) {
          TheGame theGame = TheGame.create(

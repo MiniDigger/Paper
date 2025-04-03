@@ -20,7 +20,7 @@
      private final Map<UUID, ServerPlayerUnlocks> unlocks = Maps.newHashMap();
      public final PlayerDataStorage playerIo;
      private boolean doWhiteList;
-@@ -132,13 +_,25 @@
+@@ -132,13 +_,26 @@
      private static final boolean ALLOW_LOGOUTIVATOR = false;
      private int sendAllPlayerInfoIn;
  
@@ -31,7 +31,8 @@
 +    public @Nullable String collideRuleTeamName; // Paper - Configurable player collision
 +
 +    public PlayerList(TheGame theGame, PlayerDataStorage playerIo, int maxPlayers) {
-+        this.cserver = theGame.server().server = new org.bukkit.craftbukkit.CraftServer((net.minecraft.server.dedicated.DedicatedServer) theGame.server(), this);
++        this.cserver = theGame.server().server = new org.bukkit.craftbukkit.CraftServer(theGame, this);
++        org.spigotmc.SpigotConfig.registerCommands();
 +        theGame.server().console = new com.destroystokyo.paper.console.TerminalConsoleCommandSender(); // Paper
 +        // CraftBukkit end
          this.theGame = theGame;

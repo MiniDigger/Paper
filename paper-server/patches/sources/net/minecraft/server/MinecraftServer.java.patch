@@ -1,5 +1,13 @@
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
+@@ -33,7 +_,6 @@
+ import java.util.UUID;
+ import java.util.concurrent.CompletableFuture;
+ import java.util.concurrent.Executor;
+-import java.util.concurrent.RejectedExecutionException;
+ import java.util.concurrent.TimeUnit;
+ import java.util.concurrent.atomic.AtomicReference;
+ import java.util.concurrent.locks.LockSupport;
 @@ -118,11 +_,13 @@
  import org.slf4j.Logger;
  
@@ -123,6 +131,15 @@
      }
  
      @Nullable
+@@ -255,7 +_,7 @@
+         return this.executor;
+     }
+ 
+-    protected abstract boolean initServer() throws IOException;
++    protected abstract boolean initServer(final net.minecraft.server.packs.repository.PackRepository packRepository, final net.minecraft.server.WorldStem worldStem, final net.minecraft.server.level.progress.ChunkProgressListenerFactory chunkProgressListenerFactory) throws IOException;
+ 
+     protected abstract TheGame initGame(PackRepository packRepository, WorldStem worldStem, ChunkProgressListenerFactory chunkProgressListenerFactory) throws IOException;
+ 
 @@ -273,12 +_,41 @@
          this.stopServer(this.theGame());
      }
@@ -274,6 +291,29 @@
      protected void runServer(
          PackRepository packRepository,
          WorldStem worldStem,
+@@ -352,12 +_,20 @@
+         ChunkProgressListenerFactory chunkProgressListenerFactory
+     ) {
+         try {
+-            if (!this.initServer()) {
++            if (!this.initServer(packRepository, worldStem, chunkProgressListenerFactory)) {
+                 throw new IllegalStateException("Failed to initialize server");
+             }
+ 
++            boolean first = true;
+             while (this.running) {
+-                TheGame theGame = this.initGame(packRepository, worldStem, chunkProgressListenerFactory);
++                // Paper start - move first game init to initserver
++                TheGame theGame = this.theGame;
++                if (first) {
++                    first = false;
++                } else {
++                    theGame = this.initGame(packRepository, worldStem, chunkProgressListenerFactory);
++                }
++                // Paper end
+                 this.theGame = theGame;
+                 if (this.reloadFuture != null) {
+                     this.restoreAllPlayersConfigPlayers(theGame);
 @@ -454,6 +_,34 @@
          this.status = this.buildServerStatus(theGame);
          ServerTickRateManager serverTickRateManager = theGame.tickRateManager();

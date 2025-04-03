@@ -1,5 +1,26 @@
 --- a/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -1,20 +_,15 @@
+ package net.minecraft.server.dedicated;
+ 
+-import com.google.common.collect.Lists;
+ import com.mojang.authlib.GameProfile;
+ import com.mojang.datafixers.DataFixer;
+ import com.mojang.logging.LogUtils;
+-import java.io.BufferedReader;
+ import java.io.IOException;
+-import java.io.InputStreamReader;
+ import java.io.Writer;
+ import java.net.InetAddress;
+ import java.net.Proxy;
+ import java.net.URI;
+-import java.nio.charset.StandardCharsets;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+-import java.util.Collections;
+ import java.util.List;
+ import java.util.Locale;
+ import java.util.Optional;
 @@ -64,10 +_,10 @@
      static final Logger LOGGER = LogUtils.getLogger();
      private static final int CONVERSION_RETRY_DELAY_MS = 5000;
@@ -13,7 +34,7 @@
      @Nullable
      private RconThread rconThread;
      public DedicatedServerSettings settings;
-@@ -80,15 +_,16 @@
+@@ -80,24 +_,29 @@
      public ServerLinks serverLinks;
  
      public DedicatedServer(
@@ -32,7 +53,10 @@
          this.serverTextFilter = ServerTextFilter.createFromConfig(dedicatedServerSettings.getProperties());
          this.serverLinks = createServerLinks(dedicatedServerSettings);
      }
-@@ -98,6 +_,10 @@
+ 
+     @Override
+-    public boolean initServer() throws IOException {
++    public boolean initServer(final net.minecraft.server.packs.repository.PackRepository packRepository, final net.minecraft.server.WorldStem worldStem, final net.minecraft.server.level.progress.ChunkProgressListenerFactory chunkProgressListenerFactory) throws IOException {
          Thread thread = new Thread("Server console handler") {
              @Override
              public void run() {
@@ -87,21 +111,16 @@
          LOGGER.info("Loading properties");
          DedicatedServerProperties properties = this.settings.getProperties();
          if (this.isSingleplayer()) {
-@@ -133,10 +_,51 @@
+@@ -133,10 +_,46 @@
              this.setLocalIp(properties.serverIp);
          }
  
 +        // Spigot start
 +        // Paper - TODO: we'll see what breaks if this isn't here
++        this.theGame = this.initGame(packRepository, worldStem, chunkProgressListenerFactory);
 +        //this.setPlayerList(new DedicatedPlayerList(this, this.theGame, this.playerDataStorage));
-+        org.spigotmc.SpigotConfig.init((java.io.File) this.options.valueOf("spigot-settings"));
-+        org.spigotmc.SpigotConfig.registerCommands();
 +        // Spigot end
 +        io.papermc.paper.util.ObfHelper.INSTANCE.getClass(); // Paper - load mappings for stacktrace deobf and etc.
-+        // Paper start - initialize global and world-defaults configuration
-+        this.paperConfigurations.initializeGlobalConfiguration(this.theGame().registryAccess());
-+        this.paperConfigurations.initializeWorldDefaultsConfiguration(this.theGame().registryAccess());
-+        // Paper end - initialize global and world-defaults configuration
 +        this.server.spark.enableEarlyIfRequested(); // Paper - spark
 +        // Paper start - fix converting txt to json file; convert old users earlier after PlayerList creation but before file load/save
 +        if (this.convertOldUsers()) {
@@ -200,7 +219,7 @@
  
          if (!OldUsersConverter.serverReadyAfterUserconversion(this)) {
              return false;
-@@ -195,12 +_,19 @@
+@@ -195,18 +_,28 @@
          }
      }
  
@@ -220,6 +239,16 @@
              this,
              packRepository,
              worldStem,
+             this.storageSource,
+             chunkProgressListenerFactory,
+-            theGame1 -> new DedicatedPlayerList(this, theGame1, this.playerDataStorage)
++            theGame1 -> {
++                this.theGame = theGame1;
++                return new net.minecraft.server.dedicated.DedicatedPlayerList(this, theGame1, this.playerDataStorage);
++            }
+         );
+         this.tickTimeLogger = new RemoteSampleLogger(
+             TpsDebugDimensions.values().length, new DebugSampleSubscriptionTracker(theGame.playerList()), RemoteDebugSampleType.TICK_TIME
 @@ -218,7 +_,7 @@
          String string = String.format(Locale.ROOT, "%.3fs", l / 1.0E9);
          LOGGER.info("Done ({})! For help, type \"help\"", string);

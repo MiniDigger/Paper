@@ -18,6 +18,15 @@
  
      public CommandSourceStack(
          CommandSource commandSource,
+@@ -91,7 +_,7 @@
+             CommandResultCallback.EMPTY,
+             EntityAnchorArgument.Anchor.FEET,
+             CommandSigningContext.ANONYMOUS,
+-            TaskChainer.immediate(theGame.eventLoop())
++            TaskChainer.immediate(null)
+         );
+     }
+ 
 @@ -190,6 +_,30 @@
              );
      }

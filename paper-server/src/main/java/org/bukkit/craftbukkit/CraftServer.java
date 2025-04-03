@@ -55,6 +55,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ReloadableServerRegistries;
+import net.minecraft.server.TheGame;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.commands.ReloadCommand;
@@ -259,6 +260,7 @@ import org.bukkit.util.StringUtil;
 import org.bukkit.util.permissions.DefaultPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.configurate.ConfigurateException;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -401,8 +403,8 @@ public final class CraftServer implements Server {
         CraftEntityFactory.instance();
     }
 
-    public CraftServer(DedicatedServer console, PlayerList playerList) {
-        this.console = console;
+    public CraftServer(TheGame theGame, PlayerList playerList) {
+        this.console = (DedicatedServer) theGame.server();
         this.playerList = (DedicatedPlayerList) playerList;
         this.playerView = Collections.unmodifiableList(Lists.transform(playerList.players, new Function<ServerPlayer, CraftPlayer>() {
             @Override
@@ -411,9 +413,9 @@ public final class CraftServer implements Server {
             }
         }));
         this.serverVersion = io.papermc.paper.ServerBuildInfo.buildInfo().asString(io.papermc.paper.ServerBuildInfo.StringRepresentation.VERSION_SIMPLE); // Paper - improve version
-        this.structureManager = new CraftStructureManager(console.theGame().getStructureManager(), console.theGame().registryAccess());
-        this.dataPackManager = new CraftDataPackManager(this.getServer().theGame().getPackRepository());
-        this.serverTickManager = new CraftServerTickManager(console.theGame().tickRateManager());
+        this.structureManager = new CraftStructureManager(theGame.getStructureManager(), theGame.registryAccess());
+        this.dataPackManager = new CraftDataPackManager(theGame.getPackRepository());
+        this.serverTickManager = new CraftServerTickManager(theGame.tickRateManager());
         this.serverLinks = new CraftServerLinks(console);
 
         Bukkit.setServer(this);
@@ -424,11 +426,21 @@ public final class CraftServer implements Server {
         this.pluginManager.paperPluginManager = this.paperPluginManager;
          // Paper end
 
-        CraftRegistry.setMinecraftRegistry(console.theGame().registryAccess());
+        CraftRegistry.setMinecraftRegistry(theGame.registryAccess());
 
         if (!Main.useConsole) {
             this.getLogger().info("Console input is disabled due to --noconsole command argument");
         }
+
+        org.spigotmc.SpigotConfig.init((java.io.File) MinecraftServer.getServer().options.valueOf("spigot-settings"));
+        // Paper start - initialize global and world-defaults configuration
+        try {
+            MinecraftServer.getServer().paperConfigurations.initializeGlobalConfiguration(theGame.registryAccess());
+            MinecraftServer.getServer().paperConfigurations.initializeWorldDefaultsConfiguration(theGame.registryAccess());
+        } catch (ConfigurateException e) {
+            throw new RuntimeException(e);
+        }
+        // Paper end - initialize global and world-defaults configuration
 
         this.configuration = YamlConfiguration.loadConfiguration(this.getConfigFile());
         this.configuration.options().copyDefaults(true);
@@ -486,7 +498,7 @@ public final class CraftServer implements Server {
             MapPalette.setMapColorCache(new CraftMapColorCache(this.logger));
         }
         this.potionBrewer = new io.papermc.paper.potion.PaperPotionBrewer(console); // Paper - custom potion mixes
-        datapackManager = new io.papermc.paper.datapack.PaperDatapackManager(console.theGame().getPackRepository()); // Paper
+        datapackManager = new io.papermc.paper.datapack.PaperDatapackManager(theGame.getPackRepository()); // Paper
         this.spark = new io.papermc.paper.SparksFly(this); // Paper - spark
     }
 
