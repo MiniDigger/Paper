@@ -132,7 +132,7 @@
          compound.putFloat("Health", this.getHealth());
          compound.putShort("HurtTime", (short)this.hurtTime);
          compound.putInt("HurtByTimestamp", this.lastHurtByMobTimestamp);
-@@ -785,8 +_,17 @@
+@@ -785,8 +_,20 @@
          }
      }
  
@@ -148,6 +148,9 @@
 +    }
 +
 +    @Nullable
++    public ItemEntity drop(ItemStack itemStack, boolean flag, boolean flag1, boolean callEvent, @Nullable java.util.function.Consumer<org.bukkit.entity.Item> entityOperation) {
++        return this.drop(itemStack, flag, flag1, false, callEvent, entityOperation);
++    }
 +    public ItemEntity drop(ItemStack itemStack, boolean flag, boolean flag1, boolean flag2, boolean callEvent, @Nullable java.util.function.Consumer<org.bukkit.entity.Item> entityOperation) {
          if (itemStack.isEmpty()) {
              return null;

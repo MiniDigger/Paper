@@ -160,7 +160,7 @@
              biomeZoomSeed,
 -            registryAccess.server().getMaxChainedNeighborUpdates()
 +            registryAccess.server().getMaxChainedNeighborUpdates(),
-+            gen, biomeProvider, env, spigotConfig -> registryAccess.server().paperConfigurations.createWorldConfig(io.papermc.paper.configuration.PaperConfigurations.createWorldContextMap(levelStorageAccess.levelDirectory.path(), serverLevelData.getLevelName(), dimension.location(), spigotConfig, registryAccess.registryAccess(), serverLevelData.getGameRules())) // Paper - create paper world configs
++            gen, biomeProvider, env, spigotConfig -> registryAccess.server().paperConfigurations.createWorldConfig(io.papermc.paper.configuration.PaperConfigurations.createWorldContextMap(levelStorageAccess.levelDirectory.path(), levelData.getLevelName(), dimension.location(), spigotConfig, registryAccess.registryAccess(), levelData.getGameRules())) // Paper - create paper world configs
          );
 +        // CraftBukkit start
 +        this.pvpMode = registryAccess.server().isPvpAllowed();
@@ -391,7 +391,7 @@
              AABB aabb = AABB.encapsulatingFullBlocks(heightmapPos, heightmapPos.atY(this.getMaxY() + 1)).inflate(3.0);
              List<LivingEntity> entitiesOfClass = this.getEntitiesOfClass(
 -                LivingEntity.class, aabb, livingEntity -> livingEntity != null && livingEntity.isAlive() && this.canSeeSky(livingEntity.blockPosition())
-+                LivingEntity.class, aabb, livingEntity -> livingEntity != null && livingEntity.isAlive() && this.canSeeSky(livingEntity.blockPosition()) && !entity.isSpectator() // Paper - Fix lightning being able to hit spectators (MC-262422)
++                LivingEntity.class, aabb, livingEntity -> livingEntity != null && livingEntity.isAlive() && this.canSeeSky(livingEntity.blockPosition()) && !livingEntity.isSpectator() // Paper - Fix lightning being able to hit spectators (MC-262422)
              );
              if (!entitiesOfClass.isEmpty()) {
                  return entitiesOfClass.get(this.random.nextInt(entitiesOfClass.size())).blockPosition();

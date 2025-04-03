@@ -1,0 +1,41 @@
+--- a/net/minecraft/world/level/block/entity/MineCrafterBlockEntity.java
++++ b/net/minecraft/world/level/block/entity/MineCrafterBlockEntity.java
+@@ -150,8 +_,38 @@
+     }
+ 
+     @Override
++    public int getMaxStackSize() {
++        return 0; // TODO: implement later
++    }
++
++    @Override
+     public boolean canPlaceItem(int slot, ItemStack stack) {
+         return slot != 0;
++    }
++
++    @Override
++    public java.util.List<net.minecraft.world.item.ItemStack> getContents() {
++        return java.util.List.of(); // TODO: implement later
++    }
++
++    @Override
++    public void onOpen(final org.bukkit.craftbukkit.entity.CraftHumanEntity player) {
++        // TODO: implement later
++    }
++
++    @Override
++    public void onClose(final org.bukkit.craftbukkit.entity.CraftHumanEntity player) {
++        // TODO: implement later
++    }
++
++    @Override
++    public java.util.List<org.bukkit.entity.HumanEntity> getViewers() {
++        return java.util.List.of(); // TODO: implement later
++    }
++
++    @Override
++    public void setMaxStackSize(final int size) {
++        // TODO: implement later
+     }
+ 
+     @Override

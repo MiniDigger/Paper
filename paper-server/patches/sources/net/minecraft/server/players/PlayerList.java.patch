@@ -31,8 +31,8 @@
 +    public @Nullable String collideRuleTeamName; // Paper - Configurable player collision
 +
 +    public PlayerList(TheGame theGame, PlayerDataStorage playerIo, int maxPlayers) {
-+        this.cserver = server.server = new org.bukkit.craftbukkit.CraftServer((net.minecraft.server.dedicated.DedicatedServer) server, this);
-+        server.console = new com.destroystokyo.paper.console.TerminalConsoleCommandSender(); // Paper
++        this.cserver = theGame.server().server = new org.bukkit.craftbukkit.CraftServer((net.minecraft.server.dedicated.DedicatedServer) theGame.server(), this);
++        theGame.server().console = new com.destroystokyo.paper.console.TerminalConsoleCommandSender(); // Paper
 +        // CraftBukkit end
          this.theGame = theGame;
 -        this.maxPlayers = i;
@@ -202,7 +202,7 @@
          serverLevel.addNewPlayer(player);
 -        theGame.getCustomBossEvents().onPlayerConnect(player);
 -        this.sendActivePlayerEffects(player);
-+        this.server.getCustomBossEvents().onPlayerConnect(player); // see commented out section below serverLevel.addPlayerJoin(player);
++        this.theGame().getCustomBossEvents().onPlayerConnect(player); // see commented out section below serverLevel.addPlayerJoin(player);
 +        // Paper end - Fire PlayerJoinEvent when Player is actually ready
          optional.ifPresent(compoundTag -> {
              player.loadAndSpawnEnderPearls(compoundTag);
@@ -225,7 +225,7 @@
 +
 +        if (jm != null && !jm.equals(net.kyori.adventure.text.Component.empty())) { // Paper - Adventure
 +            joinMessage = io.papermc.paper.adventure.PaperAdventure.asVanilla(jm); // Paper - Adventure
-+            this.server.getPlayerList().broadcastSystemMessage(joinMessage, false); // Paper - Adventure
++            this.theGame().playerList().broadcastSystemMessage(joinMessage, false); // Paper - Adventure
 +        }
 +        // CraftBukkit end
 +
@@ -281,7 +281,7 @@
          player.initInventoryMenu();
 +        // CraftBukkit - Moved from above, added world
 +        // Paper start - Configurable player collision; Add to collideRule team if needed
-+        final net.minecraft.world.scores.Scoreboard scoreboard = this.getServer().getLevel(Level.OVERWORLD).getScoreboard();
++        final net.minecraft.world.scores.Scoreboard scoreboard = this.theGame().getLevel(Level.OVERWORLD).getScoreboard();
 +        final PlayerTeam collideRuleTeam = scoreboard.getPlayerTeam(this.collideRuleTeamName);
 +        if (this.collideRuleTeamName != null && collideRuleTeam != null && player.getTeam() == null) {
 +            scoreboard.addPlayerToTeam(player.getScoreboardName(), collideRuleTeam);
@@ -378,12 +378,12 @@
 +        this.cserver.getPluginManager().callEvent(playerQuitEvent);
 +        player.getBukkitEntity().disconnect(playerQuitEvent.getQuitMessage());
 +
-+        if (this.server.isSameThread()) player.doTick(); // SPIGOT-924 // Paper - Improved watchdog support; don't tick during emergency shutdowns
++        if (this.theGame().server().isSameThread()) player.doTick(); // SPIGOT-924 // Paper - Improved watchdog support; don't tick during emergency shutdowns
 +        // CraftBukkit end
 +
 +        // Paper start - Configurable player collision; Remove from collideRule team if needed
 +        if (this.collideRuleTeamName != null) {
-+            final net.minecraft.world.scores.Scoreboard scoreBoard = this.server.getLevel(Level.OVERWORLD).getScoreboard();
++            final net.minecraft.world.scores.Scoreboard scoreBoard = this.theGame().getLevel(Level.OVERWORLD).getScoreboard();
 +            final PlayerTeam team = scoreBoard.getPlayersTeam(this.collideRuleTeamName);
 +            if (player.getTeam() == team && team != null) {
 +                scoreBoard.removePlayerFromTeam(player.getScoreboardName(), team);
@@ -499,7 +499,7 @@
 +        // depending on the outcome.
 +        SocketAddress socketAddress = loginlistener.connection.getRemoteAddress();
 +
-+        ServerPlayer entity = new ServerPlayer(this.server, this.server.getLevel(Level.OVERWORLD), gameProfile, ClientInformation.createDefault());
++        ServerPlayer entity = new ServerPlayer(this.theGame(), this.theGame().getLevel(Level.OVERWORLD), gameProfile, net.minecraft.server.level.ClientInformation.createDefault());
 +        entity.transferCookieConnection = loginlistener;
 +        org.bukkit.entity.Player player = entity.getBukkitEntity();
 +        org.bukkit.event.player.PlayerLoginEvent event = new org.bukkit.event.player.PlayerLoginEvent(player, loginlistener.connection.hostname, ((java.net.InetSocketAddress) socketAddress).getAddress(), ((java.net.InetSocketAddress) loginlistener.connection.channel.remoteAddress()).getAddress());
@@ -639,11 +639,11 @@
 +        // CraftBukkit start - fire PlayerRespawnEvent
 +        TeleportTransition teleportTransition;
 +        if (location == null) {
-+            teleportTransition = player.findRespawnPositionAndUseSpawnBlock(!keepInventory, TeleportTransition.DO_NOTHING, eventReason);
++            teleportTransition = serverPlayer.findRespawnPositionAndUseSpawnBlock(!flag, TeleportTransition.DO_NOTHING, eventReason);
 +
-+            if (!keepInventory) player.reset(); // SPIGOT-4785
++            if (!flag) serverPlayer.reset(); // SPIGOT-4785
 +           // Paper start - Add PlayerPostRespawnEvent
-+           if (teleportTransition == null) return player; // Early exit, mirrors belows early return for disconnected players in respawn event
++           if (teleportTransition == null) return serverPlayer; // Early exit, mirrors belows early return for disconnected players in respawn event
 +           isRespawn = true;
 +           location = org.bukkit.craftbukkit.util.CraftLocation.toBukkit(teleportTransition.position(), teleportTransition.newLevel().getWorld(), teleportTransition.yRot(), teleportTransition.xRot());
 +           // Paper end - Add PlayerPostRespawnEvent
@@ -652,7 +652,7 @@
 +        }
 +        // Spigot start
 +        if (teleportTransition == null) { // Paper - Add PlayerPostRespawnEvent - diff on change - spigot early returns if respawn pos is null, that is how they handle disconnected player in respawn event
-+            return player;
++            return serverPlayer;
 +        }
 +        // Spigot end
 +        ServerLevel level = teleportTransition.newLevel();
@@ -710,29 +710,29 @@
              }
          }
 +        // Added from changeDimension
-+        this.sendAllPlayerInfo(player); // Update health, etc...
-+        player.onUpdateAbilities();
-+        for (MobEffectInstance mobEffect : player.getActiveEffects()) {
-+            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), mobEffect, false)); // blend = false
++        this.sendAllPlayerInfo(serverPlayer); // Update health, etc...
++        serverPlayer.onUpdateAbilities();
++        for (MobEffectInstance mobEffect : serverPlayer.getActiveEffects()) {
++            serverPlayer.connection.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffect, false)); // blend = false
 +        }
 +
 +        // Fire advancement trigger
-+        player.triggerDimensionChangeTriggers(level);
++        serverPlayer.triggerDimensionChangeTriggers(level);
 +
 +        // Don't fire on respawn
 +        if (fromWorld != level) {
-+            org.bukkit.event.player.PlayerChangedWorldEvent event = new org.bukkit.event.player.PlayerChangedWorldEvent(player.getBukkitEntity(), fromWorld.getWorld());
-+            this.server.server.getPluginManager().callEvent(event);
++            org.bukkit.event.player.PlayerChangedWorldEvent event = new org.bukkit.event.player.PlayerChangedWorldEvent(serverPlayer.getBukkitEntity(), fromWorld.getWorld());
++            this.theGame().server().server.getPluginManager().callEvent(event);
 +        }
 +
 +        // Save player file again if they were disconnected
-+        if (player.connection.isDisconnected()) {
-+            this.save(player);
++        if (serverPlayer.connection.isDisconnected()) {
++            this.save(serverPlayer);
 +        }
 +
 +        // Paper start - Add PlayerPostRespawnEvent
 +        if (isRespawn) {
-+            cserver.getPluginManager().callEvent(new com.destroystokyo.paper.event.player.PlayerPostRespawnEvent(player.getBukkitEntity(), location, isBedSpawn));
++            cserver.getPluginManager().callEvent(new com.destroystokyo.paper.event.player.PlayerPostRespawnEvent(serverPlayer.getBukkitEntity(), location, isBedSpawn));
 +        }
 +        // Paper end - Add PlayerPostRespawnEvent
 +
@@ -963,13 +963,13 @@
 +        // CraftBukkit start - disconnect safely
 +        for (ServerPlayer player : this.players) {
 +            if (isRestarting) player.connection.disconnect(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().deserialize(org.spigotmc.SpigotConfig.restartMessage), org.bukkit.event.player.PlayerKickEvent.Cause.UNKNOWN); else // Paper - kick event cause (cause is never used here)
-+            player.connection.disconnect(java.util.Objects.requireNonNullElseGet(this.server.server.shutdownMessage(), net.kyori.adventure.text.Component::empty)); // CraftBukkit - add custom shutdown message // Paper - Adventure
++            player.connection.disconnect(java.util.Objects.requireNonNullElseGet(this.theGame().server().server.shutdownMessage(), net.kyori.adventure.text.Component::empty)); // CraftBukkit - add custom shutdown message // Paper - Adventure
 +        }
 +        // CraftBukkit end
 +
 +        // Paper start - Configurable player collision; Remove collideRule team if it exists
 +        if (this.collideRuleTeamName != null) {
-+            final net.minecraft.world.scores.Scoreboard scoreboard = this.getServer().getLevel(Level.OVERWORLD).getScoreboard();
++            final net.minecraft.world.scores.Scoreboard scoreboard = this.theGame().getLevel(Level.OVERWORLD).getScoreboard();
 +            final PlayerTeam team = scoreboard.getPlayersTeam(this.collideRuleTeamName);
 +            if (team != null) scoreboard.removePlayerTeam(team);
 +        }
@@ -1009,7 +1009,7 @@
 +        // Paper end
          boolean flag = this.verifyChatTrusted(message);
 -        this.theGame().server().logChatMessage(message.decoratedContent(), boundChatType, flag ? null : "Not Secure");
-+        this.theGame().server().logChatMessage((unsignedFunction == null ? message.decoratedContent() : unsignedFunction.apply(this.server.console)), boundChatType, flag ? null : "Not Secure"); // Paper
++        this.theGame().server().logChatMessage((unsignedFunction == null ? message.decoratedContent() : unsignedFunction.apply(this.theGame().server().console)), boundChatType, flag ? null : "Not Secure"); // Paper
          OutgoingChatMessage outgoingChatMessage = OutgoingChatMessage.create(message);
          boolean flag1 = false;
  

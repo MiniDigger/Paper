@@ -1400,13 +1400,13 @@ public final class CraftServer implements Server {
         }
 
         ServerLevel serverLevel = new ServerLevel(
-            this.console,
+            this.console.theGame(),
             this.console.executor,
             levelStorageAccess,
             primaryLevelData,
             dimensionKey,
-            customStem,
-            this.getServer().progressListenerFactory.create(primaryLevelData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS)),
+            customStem.type(),
+            this.getServer().theGame().progressListenerFactory.create(primaryLevelData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS)),
             primaryLevelData.isDebugWorld(),
             i,
             creator.environment() == Environment.NORMAL ? list : ImmutableList.of(),
@@ -1426,7 +1426,7 @@ public final class CraftServer implements Server {
         serverLevel.setSpawnSettings(true);
         // Paper - Put world into worldlist before initing the world; move up
 
-        this.getServer().theGame().prepareLevels(serverLevel, serverLevel.getChunkSource().chunkMap.progressListener);
+        this.getServer().theGame().prepareLevels(this.getServer().server.getServer(), serverLevel.getChunkSource().chunkMap.progressListener);
         io.papermc.paper.FeatureHooks.tickEntityManager(serverLevel); // SPIGOT-6526: Load pending entities so they are available to the API // Paper - chunk system
 
         new WorldLoadEvent(serverLevel.getWorld()).callEvent();
