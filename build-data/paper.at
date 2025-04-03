@@ -3,6 +3,8 @@
 private-f net.minecraft.network.CompressionDecoder inflater
 private-f net.minecraft.server.MinecraftServer connection
 private-f net.minecraft.server.MinecraftServer levels
+private-f net.minecraft.server.TheGame levels
+private-f net.minecraft.server.TheGame worldData
 private-f net.minecraft.world.item.ItemStack components
 private-f net.minecraft.world.item.ItemStack item
 private-f net.minecraft.world.level.block.entity.BeehiveBlockEntity stored
@@ -56,7 +58,6 @@ public net.minecraft.server.RegistryLayer STATIC_ACCESS
 public net.minecraft.server.ReloadableServerResources
 public net.minecraft.server.ServerAdvancementManager advancements
 public net.minecraft.server.Services USERID_CACHE_FILE
-public-f net.minecraft.server.TheGame potionBrewing
 public net.minecraft.server.dedicated.DedicatedPlayerList dedicatedServer
 public net.minecraft.server.dedicated.DedicatedServerProperties$WorldDimensionData
 public net.minecraft.server.dedicated.Settings getStringRaw(Ljava/lang/String;)Ljava/lang/String;
@@ -764,6 +765,7 @@ public net.minecraft.world.scores.criteria.ObjectiveCriteria CRITERIA_CACHE
 public-f net.minecraft.server.MinecraftServer potionBrewing
 public-f net.minecraft.server.MinecraftServer storageSource
 public-f net.minecraft.server.ReloadableServerResources commands
+public-f net.minecraft.server.TheGame potionBrewing
 public-f net.minecraft.server.dedicated.DedicatedServer serverLinks
 public-f net.minecraft.server.dedicated.DedicatedServer settings
 public-f net.minecraft.server.dedicated.DedicatedServerProperties pauseWhenEmptySeconds
