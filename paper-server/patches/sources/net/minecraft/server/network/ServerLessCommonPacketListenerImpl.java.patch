@@ -11,3 +11,131 @@
      private long keepAliveTime;
      private boolean keepAlivePending;
      private long keepAliveChallenge;
+@@ -57,7 +_,7 @@
+             this.latency = (this.latency * 3 + i) / 4;
+             this.keepAlivePending = false;
+         } else if (!this.isSingleplayerOwner()) {
+-            this.disconnect(TIMEOUT_DISCONNECTION_MESSAGE);
++            this.disconnect(TIMEOUT_DISCONNECTION_MESSAGE, org.bukkit.event.player.PlayerKickEvent.Cause.TIMEOUT); // Paper - add proper async disconnect
+         }
+     }
+ 
+@@ -65,9 +_,73 @@
+     public void handlePong(ServerboundPongPacket packet) {
+     }
+ 
++    public static final net.minecraft.resources.ResourceLocation CUSTOM_REGISTER = net.minecraft.resources.ResourceLocation.withDefaultNamespace("register"); // CraftBukkit
++    private static final net.minecraft.resources.ResourceLocation CUSTOM_UNREGISTER = net.minecraft.resources.ResourceLocation.withDefaultNamespace("unregister"); // CraftBukkit
++
+     @Override
+     public void handleCustomPayload(ServerboundCustomPayloadPacket packet) {
+-    }
++        // Paper start
++        if (packet.payload() instanceof net.minecraft.network.protocol.common.custom.BrandPayload(String brand)) {
++            this.player.clientBrandName = brand;
++        }
++
++        if (!(packet.payload() instanceof final net.minecraft.network.protocol.common.custom.DiscardedPayload discardedPayload)) {
++            return;
++        }
++
++        net.minecraft.network.protocol.PacketUtils.ensureRunningOnSameThread(packet, this, this.player.serverLevel());
++
++        final net.minecraft.resources.ResourceLocation identifier = packet.payload().type().id();
++        final byte[] data = discardedPayload.data();
++        try {
++            final boolean registerChannel = ServerCommonPacketListenerImpl.CUSTOM_REGISTER.equals(identifier);
++            if (registerChannel || ServerCommonPacketListenerImpl.CUSTOM_UNREGISTER.equals(identifier)) {
++                // Strings separated by zeros instead of length prefixes
++                int startIndex = 0;
++                for (int i = 0; i < data.length; i++) {
++                    final byte b = data[i];
++                    if (b != 0) {
++                        continue;
++                    }
++
++                    readChannelIdentifier(data, startIndex, i, registerChannel);
++                    startIndex = i + 1;
++                }
++
++                // Read the last one
++                readChannelIdentifier(data, startIndex, data.length, registerChannel);
++                return;
++            }
++
++            if (identifier.equals(MINECRAFT_BRAND)) {
++                this.player.clientBrandName = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.wrappedBuffer(data)).readUtf(256);
++            }
++
++            this.cserver.getMessenger().dispatchIncomingMessage(this.player.getBukkitEntity(), identifier.toString(), data);
++        } catch (final Exception e) {
++            ServerGamePacketListenerImpl.LOGGER.error("Couldn't handle custom payload on channel {}", identifier, e);
++            this.disconnect(Component.literal("Invalid custom payload payload!"), org.bukkit.event.player.PlayerKickEvent.Cause.INVALID_PAYLOAD); // Paper - kick event cause
++        }
++    }
++
++    private void readChannelIdentifier(final byte[] data, final int from, final int to, final boolean register) {
++        final int length = to - from;
++        if (length == 0) {
++            return;
++        }
++
++        final String channel = new String(data, from, length, java.nio.charset.StandardCharsets.US_ASCII);
++        if (register) {
++            this.getCraftPlayer().addChannel(channel);
++        } else {
++            this.getCraftPlayer().removeChannel(channel);
++        }
++    }
++
++    public final boolean isDisconnected() {
++        return (!this.player.joining && !this.connection.isConnected()) || this.processedDisconnect; // Paper - Fix duplication bugs
++    }
++    // Paper end
+ 
+     @Override
+     public void handleResourcePackResponse(ServerboundResourcePackPacket packet) {
+@@ -75,7 +_,7 @@
+ 
+     @Override
+     public void handleCookieResponse(ServerboundCookieResponsePacket packet) {
+-        this.disconnect(DISCONNECT_UNEXPECTED_QUERY);
++        this.disconnect(DISCONNECT_UNEXPECTED_QUERY, org.bukkit.event.player.PlayerKickEvent.Cause.INVALID_COOKIE); // Paper - kick event cause
+     }
+ 
+     protected void keepConnectionAlive() {
+@@ -83,7 +_,7 @@
+         long millis = Util.getMillis();
+         if (!this.isSingleplayerOwner() && millis - this.keepAliveTime >= 15000L) {
+             if (this.keepAlivePending) {
+-                this.disconnect(TIMEOUT_DISCONNECTION_MESSAGE);
++                this.disconnect(TIMEOUT_DISCONNECTION_MESSAGE, org.bukkit.event.player.PlayerKickEvent.Cause.TIMEOUT); // Paper - kick event cause
+             } else if (this.checkIfClosed(millis)) {
+                 this.keepAlivePending = true;
+                 this.keepAliveTime = millis;
+@@ -98,7 +_,7 @@
+     private boolean checkIfClosed(long l) {
+         if (this.closed) {
+             if (l - this.closedListenerTime >= 15000L) {
+-                this.disconnect(TIMEOUT_DISCONNECTION_MESSAGE);
++                this.disconnect(TIMEOUT_DISCONNECTION_MESSAGE, org.bukkit.event.player.PlayerKickEvent.Cause.TIMEOUT); // Paper - kick event cause
+             }
+ 
+             return false;
+@@ -130,11 +_,13 @@
+ 
+     protected abstract boolean shouldFLush();
+ 
+-    public void disconnect(Component component) {
+-        this.disconnect(new DisconnectionDetails(component));
++    // Paper start - kick event cause
++    public void disconnect(Component component, org.bukkit.event.player.PlayerKickEvent.Cause cause) {
++        this.disconnect(new DisconnectionDetails(component), cause);
++    // Paper start - kick event cause
+     }
+ 
+-    public abstract void disconnect(DisconnectionDetails disconnectionDetails);
++    public abstract void disconnect(DisconnectionDetails disconnectionDetails, org.bukkit.event.player.PlayerKickEvent.Cause cause); // Paper - kick event cause
+ 
+     protected abstract boolean isSingleplayerOwner();
+ 

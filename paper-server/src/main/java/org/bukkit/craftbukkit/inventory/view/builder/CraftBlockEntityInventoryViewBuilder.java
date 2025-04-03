@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.inventory.view.builder;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -76,7 +77,7 @@ public class CraftBlockEntityInventoryViewBuilder<V extends InventoryView> exten
         }
 
         if (!this.useFakeBlockEntity) { // gets around open noise for chest
-            return handle.create(player.nextContainerCounter(), player.getInventory());
+            return handle.create(player.nextContainerCounter(), player.getInventory(), List.of());
         }
 
         return inventory.createMenu(player.nextContainerCounter(), player.getInventory(), player);

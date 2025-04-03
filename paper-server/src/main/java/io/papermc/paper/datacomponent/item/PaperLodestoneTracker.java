@@ -46,7 +46,8 @@ public record PaperLodestoneTracker(
         public LodestoneTracker build() {
             return new PaperLodestoneTracker(new net.minecraft.world.item.component.LodestoneTracker(
                 Optional.ofNullable(this.location).map(CraftLocation::toGlobalPos),
-                this.tracked
+                this.tracked,
+                false
             ));
         }
     }

@@ -1,14 +1,5 @@
 --- a/net/minecraft/server/TheGame.java
 +++ b/net/minecraft/server/TheGame.java
-@@ -110,7 +_,7 @@
-     private TheGame.ReloadableResources resources;
-     private final StructureTemplateManager structureTemplateManager;
-     private final WorldData worldData;
--    private final PotionBrewing potionBrewing;
-+    public PotionBrewing potionBrewing;
-     private FuelValues fuelValues;
-     private final ServerScoreboard scoreboard;
-     @Nullable
 @@ -132,7 +_,7 @@
          this.registries = worldStem.registries();
          this.worldData = worldStem.worldData();
@@ -18,3 +9,367 @@
          if (!this.registries.compositeAccess().lookupOrThrow(Registries.LEVEL_STEM).containsKey(LevelStem.OVERWORLD)) {
              throw new IllegalStateException("Missing Overworld dimension data");
          } else {
+@@ -298,6 +_,7 @@
+     }
+ 
+     public static TheGame create(
++        String levelId, // CraftBukkit
+         MinecraftServer minecraftServer,
+         PackRepository packRepository,
+         WorldStem worldStem,
+@@ -311,13 +_,7 @@
+ 
+         boolean flag = false;
+         ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onWorldLoadedStarted();
+-        theGame.worldData.setModdedInfo(minecraftServer.getServerModName(), minecraftServer.getModdedStatus().shouldReportAsModified());
+-        ChunkProgressListener chunkProgressListener = chunkProgressListenerFactory.create(
+-            theGame.worldData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS)
+-        );
+-        theGame.createLevels(chunkProgressListener);
+-        minecraftServer.forceDifficulty(theGame);
+-        theGame.prepareLevels(minecraftServer, chunkProgressListener);
++        theGame.loadWorld0(levelId); // CraftBukkit
+         if (profiledDuration != null) {
+             profiledDuration.finish(true);
+         }
+@@ -333,37 +_,266 @@
+         return theGame;
+     }
+ 
+-    private void createLevels(ChunkProgressListener chunkProgressListener) {
+-        ServerLevelData serverLevelData = this.worldData.overworldData();
+-        boolean isDebugWorld = this.worldData.isDebugWorld();
+-        Registry<LevelStem> registry = this.registries.compositeAccess().lookupOrThrow(Registries.LEVEL_STEM);
+-        WorldOptions worldOptions = this.worldData.worldGenOptions();
+-        long seed = worldOptions.seed();
+-        long l = BiomeManager.obfuscateSeed(seed);
+-        List<CustomSpawner> list = ImmutableList.of(
+-            new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(serverLevelData)
+-        );
+-        LevelStem levelStem = registry.getValue(LevelStem.OVERWORLD);
+-        Holder<DimensionType> holder = this.worldData.hubDimensionType().orElse(levelStem.type());
+-        ServerLevel serverLevel = new ServerLevel(
+-            this,
+-            this.server.taskExecutor(),
+-            this.storageSource,
+-            serverLevelData,
+-            Level.OVERWORLD,
+-            holder,
+-            chunkProgressListener,
+-            isDebugWorld,
+-            l,
+-            list,
+-            true,
+-            null
+-        );
+-        this.levels.put(Level.OVERWORLD, serverLevel);
+-        DimensionDataStorage dataStorage = serverLevel.getDataStorage();
+-        this.readScoreboard(dataStorage);
+-        this.commandStorage = new CommandStorage(dataStorage);
+-        WorldBorder worldBorder = serverLevel.getWorldBorder();
++    // CraftBukkit start
++    private void loadWorld0(String levelId) {
++        // Mostly modelled off of net.minecraft.server.Main
++        LevelStorageSource.LevelStorageAccess levelStorageAccess = this.storageSource;
++        RegistryAccess.Frozen registryAccess = this.registries.compositeAccess();
++        Registry<LevelStem> levelStemRegistry = registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
++        for (LevelStem levelStem : levelStemRegistry) {
++            ResourceKey<LevelStem> levelStemKey = levelStemRegistry.getResourceKey(levelStem).get();
++            ServerLevel serverLevel;
++            int dimension = 0;
++
++            // TODO: NETHER and END no longer exist
++            /*if (levelStemKey == LevelStem.NETHER) {
++                if (this.server.getAllowNether()) {
++                    dimension = -1;
++                } else {
++                    continue;
++                }
++            } else if (levelStemKey == LevelStem.END) {
++                if (this.server.getAllowEnd()) {
++                    dimension = 1;
++                } else {
++                    continue;
++                }
++            } else */if (levelStemKey != LevelStem.OVERWORLD) {
++                dimension = -999;
++            }
++
++            // Migration of old CB world folders...
++            String worldType = (dimension == -999) ? levelStemKey.location().getNamespace() + "_" + levelStemKey.location().getPath() : org.bukkit.World.Environment.getEnvironment(dimension).toString().toLowerCase(Locale.ROOT);
++            String name = (levelStemKey == LevelStem.OVERWORLD) ? levelId : levelId + "_" + worldType;
++            if (dimension != 0) {
++                java.io.File newWorld = LevelStorageSource.getStorageFolder(new java.io.File(name).toPath(), levelStemKey).toFile();
++                java.io.File oldWorld = LevelStorageSource.getStorageFolder(new java.io.File(levelId).toPath(), levelStemKey).toFile();
++                java.io.File oldLevelDat = new java.io.File(new java.io.File(levelId), "level.dat"); // The data folders exist on first run as they are created in the PersistentCollection constructor above, but the level.dat won't
++
++                if (!newWorld.isDirectory() && oldWorld.isDirectory() && oldLevelDat.isFile()) {
++                    MinecraftServer.LOGGER.info("---- Migration of old " + worldType + " folder required ----");
++                    MinecraftServer.LOGGER.info("Unfortunately due to the way that Minecraft implemented multiworld support in 1.6, Bukkit requires that you move your " + worldType + " folder to a new location in order to operate correctly.");
++                    MinecraftServer.LOGGER.info("We will move this folder for you, but it will mean that you need to move it back should you wish to stop using Bukkit in the future.");
++                    MinecraftServer.LOGGER.info("Attempting to move " + oldWorld + " to " + newWorld + "...");
++
++                    if (newWorld.exists()) {
++                        MinecraftServer.LOGGER.warn("A file or folder already exists at " + newWorld + "!");
++                        MinecraftServer.LOGGER.info("---- Migration of old " + worldType + " folder failed ----");
++                    } else if (newWorld.getParentFile().mkdirs()) {
++                        if (oldWorld.renameTo(newWorld)) {
++                            MinecraftServer.LOGGER.info("Success! To restore " + worldType + " in the future, simply move " + newWorld + " to " + oldWorld);
++                            // Migrate world data too.
++                            try {
++                                com.google.common.io.Files.copy(oldLevelDat, new java.io.File(new java.io.File(name), "level.dat"));
++                                org.apache.commons.io.FileUtils.copyDirectory(new java.io.File(new java.io.File(levelId), "data"), new java.io.File(new java.io.File(name), "data"));
++                            } catch (IOException exception) {
++                                MinecraftServer.LOGGER.warn("Unable to migrate world data.");
++                            }
++                            MinecraftServer.LOGGER.info("---- Migration of old " + worldType + " folder complete ----");
++                        } else {
++                            MinecraftServer.LOGGER.warn("Could not move folder " + oldWorld + " to " + newWorld + "!");
++                            MinecraftServer.LOGGER.info("---- Migration of old " + worldType + " folder failed ----");
++                        }
++                    } else {
++                        MinecraftServer.LOGGER.warn("Could not create path for " + newWorld + "!");
++                        MinecraftServer.LOGGER.info("---- Migration of old " + worldType + " folder failed ----");
++                    }
++                }
++
++                try {
++                    levelStorageAccess = LevelStorageSource.createDefault(this.server.getWorldContainer().toPath()).validateAndCreateAccess(name, levelStemKey);
++                } catch (IOException | net.minecraft.world.level.validation.ContentValidationException ex) {
++                    throw new RuntimeException(ex);
++                }
++            }
++
++            com.mojang.serialization.Dynamic<?> dataTag;
++            if (levelStorageAccess.hasWorldData()) {
++                net.minecraft.world.level.storage.LevelSummary summary;
++                try {
++                    dataTag = levelStorageAccess.getDataTag();
++                    summary = levelStorageAccess.getSummary(dataTag);
++                } catch (net.minecraft.nbt.NbtException | net.minecraft.nbt.ReportedNbtException | IOException e) {
++                    LevelStorageSource.LevelDirectory levelDirectory = levelStorageAccess.getLevelDirectory();
++                    MinecraftServer.LOGGER.warn("Failed to load world data from {}", levelDirectory.dataFile(), e);
++                    MinecraftServer.LOGGER.info("Attempting to use fallback");
++
++                    try {
++                        dataTag = levelStorageAccess.getDataTagFallback();
++                        summary = levelStorageAccess.getSummary(dataTag);
++                    } catch (net.minecraft.nbt.NbtException | net.minecraft.nbt.ReportedNbtException | IOException e1) {
++                        MinecraftServer.LOGGER.error("Failed to load world data from {}", levelDirectory.oldDataFile(), e1);
++                        MinecraftServer.LOGGER.error(
++                            "Failed to load world data from {} and {}. World files may be corrupted. Shutting down.",
++                            levelDirectory.dataFile(),
++                            levelDirectory.oldDataFile()
++                        );
++                        return;
++                    }
++
++                    levelStorageAccess.restoreLevelDataFromOld();
++                }
++
++                if (summary.requiresManualConversion()) {
++                    MinecraftServer.LOGGER.info("This world must be opened in an older version (like 1.6.4) to be safely converted");
++                    return;
++                }
++
++                if (!summary.isCompatible()) {
++                    MinecraftServer.LOGGER.info("This world was created by an incompatible version.");
++                    return;
++                }
++            } else {
++                dataTag = null;
++            }
++
++            org.bukkit.generator.ChunkGenerator chunkGenerator = this.server.getGenerator(name);
++            org.bukkit.generator.BiomeProvider biomeProvider = this.server.getBiomeProvider(name);
++
++            net.minecraft.world.level.storage.PrimaryLevelData primaryLevelData;
++            WorldLoader.DataLoadContext context = this.worldLoader;
++            Registry<LevelStem> contextLevelStemRegistry = context.datapackDimensions().lookupOrThrow(Registries.LEVEL_STEM);
++            if (dataTag != null) {
++                net.minecraft.world.level.storage.LevelDataAndDimensions levelDataAndDimensions = LevelStorageSource.getLevelDataAndDimensions(
++                    dataTag, context.dataConfiguration(), contextLevelStemRegistry, context.datapackWorldgen()
++                );
++                primaryLevelData = (net.minecraft.world.level.storage.PrimaryLevelData) levelDataAndDimensions.worldData();
++            } else {
++                LevelSettings levelSettings;
++                WorldOptions worldOptions;
++                net.minecraft.world.level.levelgen.WorldDimensions worldDimensions;
++                if (this.isDemo()) {
++                    levelSettings = MinecraftServer.DEMO_SETTINGS;
++                    worldOptions = WorldOptions.DEMO_OPTIONS;
++                    worldDimensions = net.minecraft.world.level.levelgen.presets.WorldPresets.createNormalWorldDimensions(context.datapackWorldgen());
++                } else {
++                    net.minecraft.server.dedicated.DedicatedServerProperties properties = ((net.minecraft.server.dedicated.DedicatedServer) this).getProperties();
++                    levelSettings = new LevelSettings(
++                        properties.levelName,
++                        properties.gamemode,
++                        properties.hardcore,
++                        properties.difficulty,
++                        false,
++                        new GameRules(context.dataConfiguration().enabledFeatures()),
++                        context.dataConfiguration()
++                    );
++                    worldOptions = this.options.has("bonusChest") ? properties.worldOptions.withBonusChest(true) : properties.worldOptions; // CraftBukkit
++                    worldDimensions = properties.createDimensions(context.datapackWorldgen());
++                }
++
++                net.minecraft.world.level.levelgen.WorldDimensions.Complete complete = worldDimensions.bake(contextLevelStemRegistry);
++                com.mojang.serialization.Lifecycle lifecycle = complete.lifecycle().add(context.datapackWorldgen().allRegistriesLifecycle());
++
++                primaryLevelData = new net.minecraft.world.level.storage.PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), lifecycle);
++            }
++
++            primaryLevelData.checkName(name); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
++            if (this.options.has("forceUpgrade")) {
++                net.minecraft.server.Main.forceUpgrade(levelStorageAccess, primaryLevelData, net.minecraft.util.datafix.DataFixers.getDataFixer(), this.options.has("eraseCache"), () -> true, registryAccess, this.options.has("recreateRegionFiles"));
++            }
++
++            // Now modelled off the createLevels method
++            net.minecraft.world.level.storage.PrimaryLevelData serverLevelData = primaryLevelData;
++            boolean isDebugWorld = primaryLevelData.isDebugWorld();
++            WorldOptions worldOptions = primaryLevelData.worldGenOptions();
++            long seed = worldOptions.seed();
++            long l = BiomeManager.obfuscateSeed(seed);
++            List<CustomSpawner> list = ImmutableList.of(
++                new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(serverLevelData)
++            );
++            LevelStem customStem = levelStemRegistry.getValue(levelStemKey);
++
++            org.bukkit.generator.WorldInfo worldInfo = new org.bukkit.craftbukkit.generator.CraftWorldInfo(serverLevelData, levelStorageAccess, org.bukkit.World.Environment.getEnvironment(dimension), customStem.type().value(), customStem.generator(), this.registryAccess()); // Paper - Expose vanilla BiomeProvider from WorldInfo
++            if (biomeProvider == null && chunkGenerator != null) {
++                biomeProvider = chunkGenerator.getDefaultBiomeProvider(worldInfo);
++            }
++
++            ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, levelStemKey.location());
++
++            if (levelStemKey == LevelStem.OVERWORLD) {
++                this.worldData = primaryLevelData;
++                this.worldData.setGameType(((net.minecraft.server.dedicated.DedicatedServer) this).getProperties().gamemode); // From DedicatedServer.init
++
++                ChunkProgressListener listener = this.progressListenerFactory.create(this.worldData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS));
++
++                serverLevel = new ServerLevel(
++                    this, this.executor, levelStorageAccess, serverLevelData, dimensionKey, customStem, listener, isDebugWorld, l, list, true, null,
++                    org.bukkit.World.Environment.getEnvironment(dimension), chunkGenerator, biomeProvider
++                );
++                DimensionDataStorage dataStorage = serverLevel.getDataStorage();
++                this.readScoreboard(dataStorage);
++                this.commandStorage = new CommandStorage(dataStorage);
++                this.server.scoreboardManager = new org.bukkit.craftbukkit.scoreboard.CraftScoreboardManager(this, serverLevel.getScoreboard());
++            } else {
++                ChunkProgressListener listener = this.progressListenerFactory.create(this.worldData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS));
++                // Paper start - option to use the dimension_type to check if spawners should be added. I imagine mojang will add some datapack-y way of managing this in the future.
++                final List<CustomSpawner> spawners;
++                if (io.papermc.paper.configuration.GlobalConfiguration.get().misc.useDimensionTypeForCustomSpawners && this.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE).getResourceKey(customStem.type().value()).orElseThrow() == net.minecraft.world.level.dimension.BuiltinDimensionTypes.OVERWORLD) {
++                    spawners = list;
++                } else {
++                    spawners = Collections.emptyList();
++                }
++                serverLevel = new ServerLevel(
++                    this, this.executor, levelStorageAccess, serverLevelData, dimensionKey, customStem, listener, isDebugWorld, l, spawners, true, this.overworld().getRandomSequences(),
++                    org.bukkit.World.Environment.getEnvironment(dimension), chunkGenerator, biomeProvider
++                );
++                // Paper end - option to use the dimension_type to check if spawners should be added
++            }
++
++            // Back to the createLevels method without crazy modifications
++            primaryLevelData.setModdedInfo(this.getServerModName(), this.getModdedStatus().shouldReportAsModified());
++            this.addLevel(serverLevel); // Paper - Put world into worldlist before initing the world; move up
++            this.initWorld(serverLevel, primaryLevelData, this.worldData, worldOptions);
++
++            // Paper - Put world into worldlist before initing the world; move up
++            this.getPlayerList().addWorldborderListener(serverLevel);
++
++            if (primaryLevelData.getCustomBossEvents() != null) {
++                this.getCustomBossEvents().load(primaryLevelData.getCustomBossEvents(), this.registryAccess());
++            }
++        }
++        this.forceDifficulty();
++        for (ServerLevel serverLevel : this.getAllLevels()) {
++            this.prepareLevels(serverLevel.getChunkSource().chunkMap.progressListener, serverLevel);
++            serverLevel.entityManager.tick(); // SPIGOT-6526: Load pending entities so they are available to the API
++            this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(serverLevel.getWorld()));
++        }
++
++        // Paper start - Configurable player collision; Handle collideRule team for player collision toggle
++        final ServerScoreboard scoreboard = this.getScoreboard();
++        final java.util.Collection<String> toRemove = scoreboard.getPlayerTeams().stream().filter(team -> team.getName().startsWith("collideRule_")).map(net.minecraft.world.scores.PlayerTeam::getName).collect(java.util.stream.Collectors.toList());
++        for (String teamName : toRemove) {
++            scoreboard.removePlayerTeam(scoreboard.getPlayerTeam(teamName)); // Clean up after ourselves
++        }
++
++        if (!io.papermc.paper.configuration.GlobalConfiguration.get().collisions.enablePlayerCollisions) {
++            this.getPlayerList().collideRuleTeamName = org.apache.commons.lang3.StringUtils.left("collideRule_" + java.util.concurrent.ThreadLocalRandom.current().nextInt(), 16);
++            net.minecraft.world.scores.PlayerTeam collideTeam = scoreboard.addPlayerTeam(this.getPlayerList().collideRuleTeamName);
++            collideTeam.setSeeFriendlyInvisibles(false); // Because we want to mimic them not being on a team at all
++        }
++        // Paper end - Configurable player collision
++
++        this.server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.POSTWORLD);
++        this.server.spark.registerCommandBeforePlugins(this.server); // Paper - spark
++        this.server.spark.enableAfterPlugins(this.server); // Paper - spark
++        if (io.papermc.paper.plugin.PluginInitializerManager.instance().pluginRemapper != null) io.papermc.paper.plugin.PluginInitializerManager.instance().pluginRemapper.pluginsEnabled(); // Paper - Remap plugins
++        io.papermc.paper.command.brigadier.PaperCommands.INSTANCE.setValid(); // Paper - reset invalid state for event fire below
++        io.papermc.paper.plugin.lifecycle.event.LifecycleEventRunner.INSTANCE.callReloadableRegistrarEvent(io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents.COMMANDS, io.papermc.paper.command.brigadier.PaperCommands.INSTANCE, org.bukkit.plugin.Plugin.class, io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent.Cause.INITIAL); // Paper - call commands event for regular plugins
++        ((org.bukkit.craftbukkit.help.SimpleHelpMap) this.server.getHelpMap()).initializeCommands();
++        this.server.getPluginManager().callEvent(new org.bukkit.event.server.ServerLoadEvent(org.bukkit.event.server.ServerLoadEvent.LoadType.STARTUP));
++        this.connection.acceptConnections();
++    }
++
++    public void initWorld(ServerLevel serverLevel, ServerLevelData serverLevelData, WorldData saveData, WorldOptions worldOptions) {
++        boolean isDebugWorld = saveData.isDebugWorld();
++        if (serverLevel.generator != null) {
++            serverLevel.getWorld().getPopulators().addAll(serverLevel.generator.getDefaultPopulators(serverLevel.getWorld()));
++        }
++        // CraftBukkit start
++        WorldBorder worldborder = serverLevel.getWorldBorder();
++        worldborder.applySettings(serverLevelData.getWorldBorder()); // CraftBukkit - move up so that WorldBorder is set during WorldInitEvent
++        this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldInitEvent(serverLevel.getWorld())); // CraftBukkit - SPIGOT-5569: Call WorldInitEvent before any chunks are generated
++
+         if (!serverLevelData.isInitialized()) {
+             try {
+                 setInitialSpawn(serverLevel, serverLevelData, worldOptions.generateBonusChest(), isDebugWorld);
+@@ -551,11 +_,14 @@
+         }
+     }
+ 
+-    public void setDifficulty(Difficulty difficulty, boolean flag) {
+-        if (flag || !this.worldData.isDifficultyLocked()) {
++    // Paper start - per level difficulty
++    public void setDifficulty(ServerLevel level, Difficulty difficulty, boolean forced) {
++        net.minecraft.world.level.storage.PrimaryLevelData worldData = level.serverLevelData;
++        if (forced || !worldData.isDifficultyLocked()) {
+             this.worldData.setDifficulty(this.worldData.isHardcore() ? Difficulty.HARD : difficulty);
+-            this.updateMobSpawningFlags();
+-            this.playerList().getPlayers().forEach(TheGame::sendDifficultyUpdate);
++            level.setSpawnSettings(worldData.getDifficulty() != Difficulty.PEACEFUL && ((net.minecraft.server.dedicated.DedicatedServer) MinecraftServer.getServer()).settings.getProperties().spawnMonsters);
++            // this.playerList().getPlayers().forEach(TheGame::sendDifficultyUpdate);
++            // Paper end - per level difficulty
+         }
+     }
+ 
+@@ -575,7 +_,14 @@
+         }
+     }
+ 
++    // Paper start - Add ServerResourcesReloadedEvent
++    @Deprecated @io.papermc.paper.annotation.DoNotUse
+     public CompletableFuture<Void> reloadResources(Collection<String> collection) {
++        return this.reloadResources(collection, io.papermc.paper.event.server.ServerResourcesReloadedEvent.Cause.PLUGIN);
++    }
++
++    public CompletableFuture<Void> reloadResources(Collection<String> collection, io.papermc.paper.event.server.ServerResourcesReloadedEvent.Cause cause) {
++        // Paper end - Add ServerResourcesReloadedEvent
+         CompletableFuture<Void> completableFuture = CompletableFuture.<ImmutableList>supplyAsync(
+                 () -> collection.stream().map(this.packRepository::getPack).filter(Objects::nonNull).map(Pack::open).collect(ImmutableList.toImmutableList()),
+                 this.server
+@@ -606,7 +_,7 @@
+                 reloadableResources -> {
+                     this.resources.close();
+                     this.resources = reloadableResources;
+-                    this.packRepository.setSelected(collection);
++                    this.packRepository.setSelected(collection, false); // Paper - add pendingReload flag to determine required pack loading - false as this is *after* a reload (see above)
+                     WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(
+                         PackStuff.getSelectedPacks(this.packRepository, true), this.worldData.enabledFeatures()
+                     );

@@ -1,0 +1,11 @@
+--- a/net/minecraft/server/players/PlayerUnlock.java
++++ b/net/minecraft/server/players/PlayerUnlock.java
+@@ -241,7 +_,7 @@
+ 
+         public PlayerUnlock.Builder givesEffectInMine(Holder<MobEffect> holder, int i, int i1) {
+             MobEffectInstance mobEffectInstance = new MobEffectInstance(holder, i == -1 ? -1 : i * 20, i1);
+-            this.onMineEnter(serverPlayer -> serverPlayer.addEffect(mobEffectInstance, null));
++            this.onMineEnter(serverPlayer -> serverPlayer.addEffect(mobEffectInstance, null, org.bukkit.event.entity.EntityPotionEffectEvent.Cause.UNKNOWN)); // Paper
+             return this;
+         }
+ 

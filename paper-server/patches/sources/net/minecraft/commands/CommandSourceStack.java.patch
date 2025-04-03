@@ -78,7 +78,7 @@
 +        // if the server is null, we must check the vanilla perm level system
 +        // if ignoreVanillaPermissions is true, we can skip vanilla perms and just run the bukkit perm check
 +        //noinspection ConstantValue
-+        if (this.theGame == null || !this.theGame().server().ignoreVanillaPermissions) { // server & level are null for command function loading
++        if (this.theGame == null || !this.theGame().server().server.ignoreVanillaPermissions) { // server & level are null for command function loading
 +            final boolean hasPermLevel = this.permissionLevel >= i;
 +            if (this.forceRespectPermissionLevel()) { // NULL CommandSource and command blocks (if setting is enabled) should always pass the vanilla perm check
 +                return hasPermLevel && hasBukkitPerm.getAsBoolean();

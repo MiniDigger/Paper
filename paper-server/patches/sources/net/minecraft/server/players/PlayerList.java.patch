@@ -556,7 +556,7 @@
      }
  
      public boolean disconnectAllPlayersWithProfile(GameProfile gameProfile) {
-@@ -418,35 +_,111 @@
+@@ -418,35 +_,114 @@
          return !set.isEmpty();
      }
  
@@ -594,8 +594,11 @@
 +    }
 +
 +    // CraftBukkit start
++    public ServerPlayer respawn(ServerPlayer player, boolean keepInventory, Entity.RemovalReason reason, Optional<TeleportTransition> optional, @Nullable org.bukkit.event.player.PlayerRespawnEvent.RespawnReason eventReason) {
++        return this.respawn(player, keepInventory, reason, optional, eventReason, null);
++    }
 +    public ServerPlayer respawn(ServerPlayer player, boolean keepInventory, Entity.RemovalReason reason, @Nullable org.bukkit.event.player.PlayerRespawnEvent.RespawnReason eventReason) {
-+        return this.respawn(player, keepInventory, reason, eventReason, null);
++        return this.respawn(player, keepInventory, reason, Optional.empty(), eventReason, null);
 +    }
 +
 +    public ServerPlayer respawn(ServerPlayer serverPlayer, boolean flag, Entity.RemovalReason removalReason, Optional<TeleportTransition> optional, @Nullable org.bukkit.event.player.PlayerRespawnEvent.RespawnReason eventReason, @Nullable org.bukkit.Location location) {

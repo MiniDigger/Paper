@@ -132,7 +132,7 @@
          compound.putFloat("Health", this.getHealth());
          compound.putShort("HurtTime", (short)this.hurtTime);
          compound.putInt("HurtByTimestamp", this.lastHurtByMobTimestamp);
-@@ -785,8 +_,14 @@
+@@ -785,8 +_,17 @@
          }
      }
  
@@ -140,8 +140,11 @@
 -    public ItemEntity drop(ItemStack itemStack, boolean flag, boolean flag1, boolean flag2) {
 +    // Paper start - Extend dropItem API
 +    @Nullable
-+    public final ItemEntity drop(ItemStack stack, boolean randomizeMotion, boolean includeThrower, boolean flag) {
++    public final ItemEntity drop(ItemStack stack, boolean randomizeMotion, boolean includeThrower) {
 +        return this.drop(stack, randomizeMotion, includeThrower, false, true, null);
++    }
++    public final ItemEntity drop(ItemStack stack, boolean randomizeMotion, boolean includeThrower, boolean flag) {
++        return this.drop(stack, randomizeMotion, includeThrower, flag, true, null);
 +    }
 +
 +    @Nullable

@@ -224,7 +224,7 @@ public class CraftBlockType<B extends @NonNull BlockData> extends HolderableBase
 
     @Override
     public float getSlipperiness() {
-        return this.getHandle().getFriction();
+        return this.getHandle().getFriction(false);
     }
 
     @Override

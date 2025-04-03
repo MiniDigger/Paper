@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/ExperienceOrb.java
 +++ b/net/minecraft/world/entity/ExperienceOrb.java
-@@ -42,13 +_,59 @@
+@@ -42,13 +_,63 @@
      @Nullable
      private Player followingPlayer;
      private final InterpolationHandler interpolation = new InterpolationHandler(this);
@@ -44,6 +44,10 @@
 -    }
 -
 +        this(level, x, y, z, value, null, null);
++    }
++
++    public ExperienceOrb(Level level, double x, double y, double z, int value, @Nullable org.bukkit.entity.ExperienceOrb.SpawnReason reason, @Nullable Entity triggerId, @Nullable Entity sourceId) {
++        this(level, new Vec3(x, y, z), net.minecraft.world.phys.Vec3.ZERO, value, reason, triggerId, sourceId);
 +    }
 +
 +    public ExperienceOrb(Level level, double x, double y, double z, int value, @Nullable org.bukkit.entity.ExperienceOrb.SpawnReason reason, @Nullable Entity triggerId) {

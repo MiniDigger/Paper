@@ -56,6 +56,8 @@ public net.minecraft.server.RegistryLayer STATIC_ACCESS
 public net.minecraft.server.ReloadableServerResources
 public net.minecraft.server.ServerAdvancementManager advancements
 public net.minecraft.server.Services USERID_CACHE_FILE
+public-f net.minecraft.server.TheGame potionBrewing
+public net.minecraft.server.dedicated.DedicatedPlayerList dedicatedServer
 public net.minecraft.server.dedicated.DedicatedServerProperties$WorldDimensionData
 public net.minecraft.server.dedicated.Settings getStringRaw(Ljava/lang/String;)Ljava/lang/String;
 public net.minecraft.server.dedicated.Settings properties
@@ -367,6 +369,7 @@ public net.minecraft.world.entity.item.ItemEntity health
 public net.minecraft.world.entity.item.ItemEntity pickupDelay
 public net.minecraft.world.entity.item.ItemEntity target
 public net.minecraft.world.entity.item.ItemEntity thrower
+public net.minecraft.world.entity.item.PrimedTnt DEFAULT_FUSE_TIME
 public net.minecraft.world.entity.item.PrimedTnt explosionPower
 public net.minecraft.world.entity.item.PrimedTnt owner
 public net.minecraft.world.entity.monster.Creeper explodeCreeper()V

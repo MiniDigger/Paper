@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/ca/spottedleaf/moonrise/paper/PaperHooks.java
-@@ -1,0 +_,241 @@
+@@ -1,0 +_,246 @@
 +package ca.spottedleaf.moonrise.paper;
 +
 +import ca.spottedleaf.moonrise.common.PlatformHooks;
@@ -147,6 +147,11 @@
 +    @Override
 +    public boolean screenEntity(final ServerLevel world, final Entity entity, final boolean fromDisk, final boolean event) {
 +        return true;
++    }
++
++    @Override
++    public long[] getCounterTypesUncached(final net.minecraft.server.level.TicketType type) {
++        return type == net.minecraft.server.level.TicketType.FORCED ? new long[] { /*ChunkSystemTicketType.COUNTER_TYPE_FORCED*/ 0L } : it.unimi.dsi.fastutil.longs.LongArrays.EMPTY_ARRAY;
 +    }
 +
 +    @Override

@@ -58,7 +58,7 @@ public class CraftMetaCompass extends CraftMetaItem implements CompassMeta {
             int lodestoneX = (Integer) map.get(CraftMetaCompass.LODESTONE_POS_X.BUKKIT);
             int lodestoneY = (Integer) map.get(CraftMetaCompass.LODESTONE_POS_Y.BUKKIT);
             int lodestoneZ = (Integer) map.get(CraftMetaCompass.LODESTONE_POS_Z.BUKKIT);
-            this.tracker = new LodestoneTracker(Optional.of(new GlobalPos(lodestoneWorld, new BlockPos(lodestoneX, lodestoneY, lodestoneZ))), true);
+            this.tracker = new LodestoneTracker(Optional.of(new GlobalPos(lodestoneWorld, new BlockPos(lodestoneX, lodestoneY, lodestoneZ))), true, true);
         } else {
             // legacy
             Location lodestone = SerializableMeta.getObject(Location.class, map, CraftMetaCompass.LODESTONE_POS.BUKKIT, true);
@@ -69,7 +69,7 @@ public class CraftMetaCompass extends CraftMetaItem implements CompassMeta {
 
         final Optional<Boolean> tracked = SerializableMeta.getObjectOptionally(Boolean.class, map, CraftMetaCompass.LODESTONE_TRACKED.BUKKIT, true);
         final Optional<GlobalPos> trackedPos = this.tracker != null ? this.tracker.target() : Optional.empty();
-        tracked.ifPresent(isTracked -> this.tracker = new LodestoneTracker(trackedPos, isTracked));
+        tracked.ifPresent(isTracked -> this.tracker = new LodestoneTracker(trackedPos, isTracked, true));
     }
 
     @Override
@@ -116,7 +116,7 @@ public class CraftMetaCompass extends CraftMetaItem implements CompassMeta {
         Preconditions.checkArgument(lodestone == null || lodestone.getWorld() != null, "world is null");
         if (lodestone == null) {
             if (this.tracker != null) {
-                this.tracker = new LodestoneTracker(java.util.Optional.empty(), this.tracker.tracked());
+                this.tracker = new LodestoneTracker(java.util.Optional.empty(), this.tracker.tracked(), false);
             }
         } else {
             GlobalPos pos = GlobalPos.of(
@@ -124,7 +124,7 @@ public class CraftMetaCompass extends CraftMetaItem implements CompassMeta {
                 CraftLocation.toBlockPosition(lodestone)
             );
             boolean tracked = this.tracker == null || this.tracker.tracked();
-            this.tracker = new LodestoneTracker(Optional.of(pos), tracked);
+            this.tracker = new LodestoneTracker(Optional.of(pos), tracked, false);
         }
     }
 
@@ -136,7 +136,7 @@ public class CraftMetaCompass extends CraftMetaItem implements CompassMeta {
     @Override
     public void setLodestoneTracked(boolean tracked) {
         final Optional<GlobalPos> trackedPos = this.tracker != null ? this.tracker.target() : Optional.empty();
-        this.tracker = new LodestoneTracker(trackedPos, tracked);
+        this.tracker = new LodestoneTracker(trackedPos, tracked, false);
     }
 
     @Override

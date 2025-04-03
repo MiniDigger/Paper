@@ -1,0 +1,36 @@
+--- a/net/minecraft/server/network/ServerHibernateConfigPacketListenerImpl.java
++++ b/net/minecraft/server/network/ServerHibernateConfigPacketListenerImpl.java
+@@ -19,13 +_,15 @@
+ public class ServerHibernateConfigPacketListenerImpl extends ServerLessCommonPacketListenerImpl implements ServerConfigurationPacketListener {
+     private final Executor mainThreadExecutor;
+     private final GameProfile gameProfile;
++    private net.minecraft.server.level.ServerPlayer player; // Paper
+     private static final Logger LOGGER = LogUtils.getLogger();
+     private ClientInformation clientInformation;
+ 
+-    public ServerHibernateConfigPacketListenerImpl(Connection connection, CommonListenerCookie commonListenerCookie, Executor executor) {
++    public ServerHibernateConfigPacketListenerImpl(Connection connection, CommonListenerCookie commonListenerCookie, Executor executor, net.minecraft.server.level.ServerPlayer player) { // Paper
+         super(connection, commonListenerCookie);
+         this.mainThreadExecutor = executor;
+         this.gameProfile = commonListenerCookie.gameProfile();
++        this.player = player;
+         this.clientInformation = commonListenerCookie.clientInformation();
+     }
+ 
+@@ -44,7 +_,7 @@
+     }
+ 
+     @Override
+-    public void disconnect(DisconnectionDetails disconnectionDetails) {
++    public void disconnect(DisconnectionDetails disconnectionDetails, final org.bukkit.event.player.PlayerKickEvent.Cause cause) {
+         this.connection
+             .send(
+                 new ClientboundDisconnectPacket(disconnectionDetails.reason()),
+@@ -80,6 +_,6 @@
+     }
+ 
+     public ServerConfigurationPacketListenerImpl unfreeze(TheGame theGame) {
+-        return new ServerConfigurationPacketListenerImpl(theGame, this.connection, this.createCookie(this.clientInformation));
++        return new ServerConfigurationPacketListenerImpl(theGame, this.connection, this.createCookie(this.clientInformation), player); // Paper
+     }
+ }

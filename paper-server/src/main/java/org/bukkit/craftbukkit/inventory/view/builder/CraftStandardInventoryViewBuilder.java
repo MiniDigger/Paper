@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.inventory.view.builder;
 
+import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -16,7 +17,7 @@ public class CraftStandardInventoryViewBuilder<V extends InventoryView> extends 
 
     @Override
     protected AbstractContainerMenu buildContainer(final ServerPlayer player) {
-        return super.handle.create(player.nextContainerCounter(), player.getInventory());
+        return super.handle.create(player.nextContainerCounter(), player.getInventory(), List.of());
     }
 
     @Override

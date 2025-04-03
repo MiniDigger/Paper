@@ -46,7 +46,7 @@
      }
  
      @Override
-@@ -145,16 +_,21 @@
+@@ -145,16 +_,22 @@
                  return;
              }
  
@@ -57,8 +57,8 @@
                  return;
              }
  
--            ServerPlayer serverPlayer = new ServerPlayer(this.theGame, this.theGame.overworld(), this.gameProfile, this.clientInformation);
-+            ServerPlayer serverPlayer = new ServerPlayer(this.theGame, this.theGame.overworld(), this.gameProfile, this.clientInformation, this.player); // CraftBukkit
+             ServerPlayer serverPlayer = new ServerPlayer(this.theGame, this.theGame.overworld(), this.gameProfile, this.clientInformation);
++            serverPlayer.updateOptions(this.clientInformation); // CraftBukkit
              playerList.placeNewPlayer(this.connection, serverPlayer, this.createCookie(this.clientInformation));
          } catch (Exception var5) {
              LOGGER.error("Couldn't place player in world", (Throwable)var5);

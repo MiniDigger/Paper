@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.inventory;
 
+import java.util.List;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -160,7 +161,7 @@ public class CraftContainer extends AbstractContainerMenu {
                 this.setupWorkbench(top, bottom); // SPIGOT-3812 - manually set up slots so we can use the delegated inventory and not the automatically created one
                 break;
             case ENCHANTING:
-                this.delegate = new EnchantmentMenu(windowId, bottom);
+                this.delegate = new EnchantmentMenu(windowId, bottom, List.of());
                 break;
             case BREWING:
                 this.delegate = new BrewingStandMenu(windowId, bottom, top, new io.papermc.paper.inventory.BrewingSimpleContainerData()); // Paper - Add recipeBrewTime
@@ -172,7 +173,7 @@ public class CraftContainer extends AbstractContainerMenu {
                 this.setupAnvil(top, bottom); // SPIGOT-6783 - manually set up slots so we can use the delegated inventory and not the automatically created one
                 break;
             case BEACON:
-                this.delegate = new BeaconMenu(windowId, bottom);
+                this.delegate = new BeaconMenu(windowId, bottom, List.of());
                 break;
             case SHULKER_BOX:
                 this.delegate = new ShulkerBoxMenu(windowId, bottom, top);
@@ -187,26 +188,26 @@ public class CraftContainer extends AbstractContainerMenu {
                 this.delegate = new SmokerMenu(windowId, bottom, top, new SimpleContainerData(4));
                 break;
             case LOOM:
-                this.delegate = new LoomMenu(windowId, bottom);
+                this.delegate = new LoomMenu(windowId, bottom, List.of());
                 break;
             case CARTOGRAPHY:
-                this.delegate = new CartographyTableMenu(windowId, bottom);
+                this.delegate = new CartographyTableMenu(windowId, bottom, List.of());
                 break;
             case GRINDSTONE:
-                this.delegate = new GrindstoneMenu(windowId, bottom);
+                this.delegate = new GrindstoneMenu(windowId, bottom, List.of());
                 break;
             case STONECUTTER:
                 this.setupStoneCutter(top, bottom); // SPIGOT-7757 - manual setup required for individual slots
                 break;
             case MERCHANT:
-                this.delegate = new MerchantMenu(windowId, bottom);
+                this.delegate = new MerchantMenu(windowId, bottom, List.of());
                 break;
             case SMITHING:
             case SMITHING_NEW:
                 this.setupSmithing(top, bottom); // SPIGOT-6783 - manually set up slots so we can use the delegated inventory and not the automatically created one
                 break;
             case CRAFTER:
-                this.delegate = new CrafterMenu(windowId, bottom);
+                this.delegate = new CrafterMenu(windowId, bottom, List.of());
                 break;
         }
 

@@ -61,7 +61,7 @@
                      + (this.currentlyGenerating == null ? "" : ", currently generating: " + this.currentlyGenerating.get())
              );
 +                hasSetFarWarned = true;
-+                if (this.getServer() != null && this.getServer().isDebugging()) {
++                if (net.minecraft.server.MinecraftServer.getServer() != null && net.minecraft.server.MinecraftServer.getServer().isDebugging()) {
 +                    io.papermc.paper.util.TraceUtil.dumpTraceForThread("far setBlock call");
 +                }
 +            }

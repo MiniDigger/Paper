@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
-@@ -29,6 +_,12 @@
+@@ -29,10 +_,16 @@
  import net.minecraft.world.level.material.FluidState;
  import net.minecraft.world.level.portal.TeleportTransition;
  
@@ -13,6 +13,11 @@
  public class PrimedTnt extends Entity implements TraceableEntity {
      private static final EntityDataAccessor<Integer> DATA_FUSE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.INT);
      private static final EntityDataAccessor<BlockState> DATA_BLOCK_STATE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.BLOCK_STATE);
+-    public static final short DEFAULT_FUSE_TIME = 80;
++    public static final short DEFAULT_FUSE_TIME = 80; // Paper - TODO: AT transform
+     private static final float DEFAULT_EXPLOSION_POWER = 4.0F;
+     private static final BlockState DEFAULT_BLOCK_STATE = Blocks.TNT.defaultBlockState();
+     private static final String TAG_BLOCK_STATE = "block_state";
 @@ -53,6 +_,7 @@
      public LivingEntity owner;
      private boolean usedPortal;

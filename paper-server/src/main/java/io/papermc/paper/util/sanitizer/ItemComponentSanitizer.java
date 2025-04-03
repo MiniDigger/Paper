@@ -26,7 +26,7 @@ public final class ItemComponentSanitizer {
      * This is possibly because dropping the patched type may introduce visual changes.
      */
     static final Map<DataComponentType<?>, UnaryOperator<?>> SANITIZATION_OVERRIDES = Util.make(ImmutableMap.<DataComponentType<?>, UnaryOperator<?>>builder(), (map) -> {
-            put(map, DataComponents.LODESTONE_TRACKER, empty(new LodestoneTracker(Optional.empty(), false))); // We need it to be present to keep the glint
+            put(map, DataComponents.LODESTONE_TRACKER, empty(new LodestoneTracker(Optional.empty(), false, false))); // We need it to be present to keep the glint
             put(map, DataComponents.POTION_CONTENTS, ItemComponentSanitizer::sanitizePotionContents); // Custom situational serialization
 
             if (MinecraftServer.getServer().theGame().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).size() > 0) {

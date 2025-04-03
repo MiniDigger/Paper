@@ -199,7 +199,7 @@
  
          if (!OldUsersConverter.serverReadyAfterUserconversion(this)) {
              return false;
-@@ -195,6 +_,12 @@
+@@ -195,12 +_,19 @@
          }
      }
  
@@ -212,6 +212,13 @@
      @Override
      public TheGame initGame(PackRepository packRepository, WorldStem worldStem, ChunkProgressListenerFactory chunkProgressListenerFactory) throws IOException {
          DedicatedServerProperties properties = this.settings.getProperties();
+         long nanos = Util.getNanos();
+         LOGGER.info("Preparing level \"{}\"", this.getLevelIdName());
+         TheGame theGame = TheGame.create(
++            this.storageSource.getLevelId(), // Paper
+             this,
+             packRepository,
+             worldStem,
 @@ -245,7 +_,7 @@
  
      @Override
