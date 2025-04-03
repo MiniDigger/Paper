@@ -9,6 +9,29 @@
          if (!this.registries.compositeAccess().lookupOrThrow(Registries.LEVEL_STEM).containsKey(LevelStem.OVERWORLD)) {
              throw new IllegalStateException("Missing Overworld dimension data");
          } else {
+@@ -209,6 +_,22 @@
+         return this.levels.get(resourceKey);
+     }
+ 
++    // CraftBukkit start
++    public void addLevel(ServerLevel level) {
++        Map<ResourceKey<Level>, ServerLevel> oldLevels = this.levels;
++        Map<ResourceKey<Level>, ServerLevel> newLevels = com.google.common.collect.Maps.newLinkedHashMap(oldLevels);
++        newLevels.put(level.dimension(), level);
++        this.levels = java.util.Collections.unmodifiableMap(newLevels);
++    }
++
++    public void removeLevel(ServerLevel level) {
++        Map<ResourceKey<Level>, ServerLevel> oldLevels = this.levels;
++        Map<ResourceKey<Level>, ServerLevel> newLevels = com.google.common.collect.Maps.newLinkedHashMap(oldLevels);
++        newLevels.remove(level.dimension());
++        this.levels = java.util.Collections.unmodifiableMap(newLevels);
++    }
++    // CraftBukkit end
++
+     public Set<ResourceKey<Level>> levelKeys() {
+         return this.levels.keySet();
+     }
 @@ -298,6 +_,7 @@
      }
  
@@ -28,7 +51,7 @@
 -        theGame.createLevels(chunkProgressListener);
 -        minecraftServer.forceDifficulty(theGame);
 -        theGame.prepareLevels(minecraftServer, chunkProgressListener);
-+        theGame.loadWorld0(levelId); // CraftBukkit
++        theGame.loadWorld0(levelId, chunkProgressListenerFactory); // CraftBukkit
          if (profiledDuration != null) {
              profiledDuration.finish(true);
          }
@@ -68,7 +91,7 @@
 -        this.commandStorage = new CommandStorage(dataStorage);
 -        WorldBorder worldBorder = serverLevel.getWorldBorder();
 +    // CraftBukkit start
-+    private void loadWorld0(String levelId) {
++    private void loadWorld0(String levelId, ChunkProgressListenerFactory chunkProgressListenerFactory) {
 +        // Mostly modelled off of net.minecraft.server.Main
 +        LevelStorageSource.LevelStorageAccess levelStorageAccess = this.storageSource;
 +        RegistryAccess.Frozen registryAccess = this.registries.compositeAccess();
@@ -134,7 +157,7 @@
 +                }
 +
 +                try {
-+                    levelStorageAccess = LevelStorageSource.createDefault(this.server.getWorldContainer().toPath()).validateAndCreateAccess(name, levelStemKey);
++                    levelStorageAccess = LevelStorageSource.createDefault(this.server.server.getWorldContainer().toPath()).validateAndCreateAccess(name, levelStemKey);
 +                } catch (IOException | net.minecraft.world.level.validation.ContentValidationException ex) {
 +                    throw new RuntimeException(ex);
 +                }
@@ -180,11 +203,11 @@
 +                dataTag = null;
 +            }
 +
-+            org.bukkit.generator.ChunkGenerator chunkGenerator = this.server.getGenerator(name);
-+            org.bukkit.generator.BiomeProvider biomeProvider = this.server.getBiomeProvider(name);
++            org.bukkit.generator.ChunkGenerator chunkGenerator = this.server.server.getGenerator(name);
++            org.bukkit.generator.BiomeProvider biomeProvider = this.server.server.getBiomeProvider(name);
 +
 +            net.minecraft.world.level.storage.PrimaryLevelData primaryLevelData;
-+            WorldLoader.DataLoadContext context = this.worldLoader;
++            WorldLoader.DataLoadContext context = this.server.worldLoader;
 +            Registry<LevelStem> contextLevelStemRegistry = context.datapackDimensions().lookupOrThrow(Registries.LEVEL_STEM);
 +            if (dataTag != null) {
 +                net.minecraft.world.level.storage.LevelDataAndDimensions levelDataAndDimensions = LevelStorageSource.getLevelDataAndDimensions(
@@ -192,16 +215,16 @@
 +                );
 +                primaryLevelData = (net.minecraft.world.level.storage.PrimaryLevelData) levelDataAndDimensions.worldData();
 +            } else {
-+                LevelSettings levelSettings;
++                net.minecraft.world.level.LevelSettings levelSettings;
 +                WorldOptions worldOptions;
 +                net.minecraft.world.level.levelgen.WorldDimensions worldDimensions;
-+                if (this.isDemo()) {
++                if (this.server.isDemo()) {
 +                    levelSettings = MinecraftServer.DEMO_SETTINGS;
 +                    worldOptions = WorldOptions.DEMO_OPTIONS;
 +                    worldDimensions = net.minecraft.world.level.levelgen.presets.WorldPresets.createNormalWorldDimensions(context.datapackWorldgen());
 +                } else {
-+                    net.minecraft.server.dedicated.DedicatedServerProperties properties = ((net.minecraft.server.dedicated.DedicatedServer) this).getProperties();
-+                    levelSettings = new LevelSettings(
++                    net.minecraft.server.dedicated.DedicatedServerProperties properties = ((net.minecraft.server.dedicated.DedicatedServer) this.server).getProperties();
++                    levelSettings = new net.minecraft.world.level.LevelSettings(
 +                        properties.levelName,
 +                        properties.gamemode,
 +                        properties.hardcore,
@@ -210,7 +233,7 @@
 +                        new GameRules(context.dataConfiguration().enabledFeatures()),
 +                        context.dataConfiguration()
 +                    );
-+                    worldOptions = this.options.has("bonusChest") ? properties.worldOptions.withBonusChest(true) : properties.worldOptions; // CraftBukkit
++                    worldOptions = this.server.options.has("bonusChest") ? properties.worldOptions.withBonusChest(true) : properties.worldOptions; // CraftBukkit
 +                    worldDimensions = properties.createDimensions(context.datapackWorldgen());
 +                }
 +
@@ -221,8 +244,8 @@
 +            }
 +
 +            primaryLevelData.checkName(name); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
-+            if (this.options.has("forceUpgrade")) {
-+                net.minecraft.server.Main.forceUpgrade(levelStorageAccess, primaryLevelData, net.minecraft.util.datafix.DataFixers.getDataFixer(), this.options.has("eraseCache"), () -> true, registryAccess, this.options.has("recreateRegionFiles"));
++            if (this.server.options.has("forceUpgrade")) {
++                net.minecraft.server.Main.forceUpgrade(levelStorageAccess, primaryLevelData, net.minecraft.util.datafix.DataFixers.getDataFixer(), this.server.options.has("eraseCache"), () -> true, registryAccess, this.server.options.has("recreateRegionFiles"));
 +            }
 +
 +            // Now modelled off the createLevels method
@@ -236,7 +259,7 @@
 +            );
 +            LevelStem customStem = levelStemRegistry.getValue(levelStemKey);
 +
-+            org.bukkit.generator.WorldInfo worldInfo = new org.bukkit.craftbukkit.generator.CraftWorldInfo(serverLevelData, levelStorageAccess, org.bukkit.World.Environment.getEnvironment(dimension), customStem.type().value(), customStem.generator(), this.registryAccess()); // Paper - Expose vanilla BiomeProvider from WorldInfo
++            org.bukkit.generator.WorldInfo worldInfo = new org.bukkit.craftbukkit.generator.CraftWorldInfo(serverLevelData, levelStorageAccess, org.bukkit.World.Environment.getEnvironment(dimension), customStem.type().value(), customStem.generator().get(), this.registryAccess()); // Paper - Expose vanilla BiomeProvider from WorldInfo
 +            if (biomeProvider == null && chunkGenerator != null) {
 +                biomeProvider = chunkGenerator.getDefaultBiomeProvider(worldInfo);
 +            }
@@ -245,51 +268,51 @@
 +
 +            if (levelStemKey == LevelStem.OVERWORLD) {
 +                this.worldData = primaryLevelData;
-+                this.worldData.setGameType(((net.minecraft.server.dedicated.DedicatedServer) this).getProperties().gamemode); // From DedicatedServer.init
++                this.worldData.setGameType(((net.minecraft.server.dedicated.DedicatedServer) this.server).getProperties().gamemode); // From DedicatedServer.init
 +
-+                ChunkProgressListener listener = this.progressListenerFactory.create(this.worldData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS));
++                ChunkProgressListener listener = chunkProgressListenerFactory.create(this.worldData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS));
 +
 +                serverLevel = new ServerLevel(
-+                    this, this.executor, levelStorageAccess, serverLevelData, dimensionKey, customStem, listener, isDebugWorld, l, list, true, null,
++                    this, this.server.executor, levelStorageAccess, serverLevelData, dimensionKey, customStem.type(), listener, isDebugWorld, l, list, true, null,
 +                    org.bukkit.World.Environment.getEnvironment(dimension), chunkGenerator, biomeProvider
 +                );
 +                DimensionDataStorage dataStorage = serverLevel.getDataStorage();
 +                this.readScoreboard(dataStorage);
 +                this.commandStorage = new CommandStorage(dataStorage);
-+                this.server.scoreboardManager = new org.bukkit.craftbukkit.scoreboard.CraftScoreboardManager(this, serverLevel.getScoreboard());
++                this.server.server.scoreboardManager = new org.bukkit.craftbukkit.scoreboard.CraftScoreboardManager(this.server, serverLevel.getScoreboard());
 +            } else {
-+                ChunkProgressListener listener = this.progressListenerFactory.create(this.worldData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS));
++                ChunkProgressListener listener = chunkProgressListenerFactory.create(this.worldData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS));
 +                // Paper start - option to use the dimension_type to check if spawners should be added. I imagine mojang will add some datapack-y way of managing this in the future.
 +                final List<CustomSpawner> spawners;
 +                if (io.papermc.paper.configuration.GlobalConfiguration.get().misc.useDimensionTypeForCustomSpawners && this.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE).getResourceKey(customStem.type().value()).orElseThrow() == net.minecraft.world.level.dimension.BuiltinDimensionTypes.OVERWORLD) {
 +                    spawners = list;
 +                } else {
-+                    spawners = Collections.emptyList();
++                    spawners = java.util.Collections.emptyList();
 +                }
 +                serverLevel = new ServerLevel(
-+                    this, this.executor, levelStorageAccess, serverLevelData, dimensionKey, customStem, listener, isDebugWorld, l, spawners, true, this.overworld().getRandomSequences(),
++                    this, this.server.executor, levelStorageAccess, serverLevelData, dimensionKey, customStem.type(), listener, isDebugWorld, l, spawners, true, this.overworld().getRandomSequences(),
 +                    org.bukkit.World.Environment.getEnvironment(dimension), chunkGenerator, biomeProvider
 +                );
 +                // Paper end - option to use the dimension_type to check if spawners should be added
 +            }
 +
 +            // Back to the createLevels method without crazy modifications
-+            primaryLevelData.setModdedInfo(this.getServerModName(), this.getModdedStatus().shouldReportAsModified());
++            primaryLevelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().shouldReportAsModified());
 +            this.addLevel(serverLevel); // Paper - Put world into worldlist before initing the world; move up
 +            this.initWorld(serverLevel, primaryLevelData, this.worldData, worldOptions);
 +
 +            // Paper - Put world into worldlist before initing the world; move up
-+            this.getPlayerList().addWorldborderListener(serverLevel);
++            this.playerList().addWorldborderListener(serverLevel);
 +
 +            if (primaryLevelData.getCustomBossEvents() != null) {
 +                this.getCustomBossEvents().load(primaryLevelData.getCustomBossEvents(), this.registryAccess());
 +            }
 +        }
-+        this.forceDifficulty();
++        this.server.forceDifficulty(this);
 +        for (ServerLevel serverLevel : this.getAllLevels()) {
-+            this.prepareLevels(serverLevel.getChunkSource().chunkMap.progressListener, serverLevel);
++            this.prepareLevels(this.server, serverLevel.getChunkSource().chunkMap.progressListener);
 +            serverLevel.entityManager.tick(); // SPIGOT-6526: Load pending entities so they are available to the API
-+            this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(serverLevel.getWorld()));
++            this.server.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(serverLevel.getWorld()));
 +        }
 +
 +        // Paper start - Configurable player collision; Handle collideRule team for player collision toggle
@@ -300,21 +323,21 @@
 +        }
 +
 +        if (!io.papermc.paper.configuration.GlobalConfiguration.get().collisions.enablePlayerCollisions) {
-+            this.getPlayerList().collideRuleTeamName = org.apache.commons.lang3.StringUtils.left("collideRule_" + java.util.concurrent.ThreadLocalRandom.current().nextInt(), 16);
-+            net.minecraft.world.scores.PlayerTeam collideTeam = scoreboard.addPlayerTeam(this.getPlayerList().collideRuleTeamName);
++            this.playerList().collideRuleTeamName = org.apache.commons.lang3.StringUtils.left("collideRule_" + java.util.concurrent.ThreadLocalRandom.current().nextInt(), 16);
++            net.minecraft.world.scores.PlayerTeam collideTeam = scoreboard.addPlayerTeam(this.playerList().collideRuleTeamName);
 +            collideTeam.setSeeFriendlyInvisibles(false); // Because we want to mimic them not being on a team at all
 +        }
 +        // Paper end - Configurable player collision
 +
-+        this.server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.POSTWORLD);
-+        this.server.spark.registerCommandBeforePlugins(this.server); // Paper - spark
-+        this.server.spark.enableAfterPlugins(this.server); // Paper - spark
++        this.server.server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.POSTWORLD);
++        this.server.server.spark.registerCommandBeforePlugins(this.server.server); // Paper - spark
++        this.server.server.spark.enableAfterPlugins(this.server.server); // Paper - spark
 +        if (io.papermc.paper.plugin.PluginInitializerManager.instance().pluginRemapper != null) io.papermc.paper.plugin.PluginInitializerManager.instance().pluginRemapper.pluginsEnabled(); // Paper - Remap plugins
 +        io.papermc.paper.command.brigadier.PaperCommands.INSTANCE.setValid(); // Paper - reset invalid state for event fire below
 +        io.papermc.paper.plugin.lifecycle.event.LifecycleEventRunner.INSTANCE.callReloadableRegistrarEvent(io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents.COMMANDS, io.papermc.paper.command.brigadier.PaperCommands.INSTANCE, org.bukkit.plugin.Plugin.class, io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent.Cause.INITIAL); // Paper - call commands event for regular plugins
-+        ((org.bukkit.craftbukkit.help.SimpleHelpMap) this.server.getHelpMap()).initializeCommands();
-+        this.server.getPluginManager().callEvent(new org.bukkit.event.server.ServerLoadEvent(org.bukkit.event.server.ServerLoadEvent.LoadType.STARTUP));
-+        this.connection.acceptConnections();
++        ((org.bukkit.craftbukkit.help.SimpleHelpMap) this.server.server.getHelpMap()).initializeCommands();
++        this.server.server.getPluginManager().callEvent(new org.bukkit.event.server.ServerLoadEvent(org.bukkit.event.server.ServerLoadEvent.LoadType.STARTUP));
++        this.server.getConnection().acceptConnections();
 +    }
 +
 +    public void initWorld(ServerLevel serverLevel, ServerLevelData serverLevelData, WorldData saveData, WorldOptions worldOptions) {
@@ -325,11 +348,62 @@
 +        // CraftBukkit start
 +        WorldBorder worldborder = serverLevel.getWorldBorder();
 +        worldborder.applySettings(serverLevelData.getWorldBorder()); // CraftBukkit - move up so that WorldBorder is set during WorldInitEvent
-+        this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldInitEvent(serverLevel.getWorld())); // CraftBukkit - SPIGOT-5569: Call WorldInitEvent before any chunks are generated
++        this.server.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldInitEvent(serverLevel.getWorld())); // CraftBukkit - SPIGOT-5569: Call WorldInitEvent before any chunks are generated
 +
          if (!serverLevelData.isInitialized()) {
              try {
                  setInitialSpawn(serverLevel, serverLevelData, worldOptions.generateBonusChest(), isDebugWorld);
+@@ -384,40 +_,8 @@
+ 
+             serverLevelData.setInitialized(true);
+         }
+-
+-        this.playerList().addWorldborderListener(serverLevel);
+-        if (this.worldData.getCustomBossEvents() != null) {
+-            this.getCustomBossEvents().load(this.worldData.getCustomBossEvents(), this.registryAccess());
+-        }
+-
+-        RandomSequences randomSequences = serverLevel.getRandomSequences();
+-
+-        for (Entry<ResourceKey<LevelStem>, LevelStem> entry : registry.entrySet()) {
+-            ResourceKey<LevelStem> resourceKey = entry.getKey();
+-            if (resourceKey != LevelStem.OVERWORLD) {
+-                ResourceKey<Level> resourceKey1 = ResourceKey.create(Registries.DIMENSION, resourceKey.location());
+-                DerivedLevelData derivedLevelData = new DerivedLevelData(this.worldData, serverLevelData);
+-                ServerLevel serverLevel1 = new ServerLevel(
+-                    this,
+-                    this.server.taskExecutor(),
+-                    this.storageSource,
+-                    derivedLevelData,
+-                    resourceKey1,
+-                    entry.getValue().type(),
+-                    chunkProgressListener,
+-                    isDebugWorld,
+-                    l,
+-                    ImmutableList.of(),
+-                    false,
+-                    randomSequences
+-                );
+-                worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel1.getWorldBorder()));
+-                this.levels.put(resourceKey1, serverLevel1);
+-            }
+-        }
+-
+-        worldBorder.applySettings(serverLevelData.getWorldBorder());
+     }
++    // CraftBukkit end
+ 
+     private void readScoreboard(DimensionDataStorage dimensionDataStorage) {
+         dimensionDataStorage.computeIfAbsent(ServerScoreboard.TYPE);
+@@ -445,7 +_,7 @@
+         serverLevelData.setGameType(GameType.SPECTATOR);
+     }
+ 
+-    private void prepareLevels(MinecraftServer minecraftServer, ChunkProgressListener chunkProgressListener) {
++    public void prepareLevels(MinecraftServer minecraftServer, ChunkProgressListener chunkProgressListener) {
+         ServerLevel serverLevel = this.overworld();
+         LOGGER.info("Preparing start region for dimension {}", serverLevel.dimension().location());
+         BlockPos sharedSpawnPos = serverLevel.getSharedSpawnPos();
 @@ -551,11 +_,14 @@
          }
      }

@@ -1420,13 +1420,13 @@ public final class CraftServer implements Server {
             return null;
         }
 
-        this.console.addLevel(serverLevel); // Paper - Put world into worldlist before initing the world; move up
-        this.console.initWorld(serverLevel, primaryLevelData, primaryLevelData, primaryLevelData.worldGenOptions());
+        this.console.theGame().addLevel(serverLevel); // Paper - Put world into worldlist before initing the world; move up
+        this.console.theGame().initWorld(serverLevel, primaryLevelData, primaryLevelData, primaryLevelData.worldGenOptions());
 
         serverLevel.setSpawnSettings(true);
         // Paper - Put world into worldlist before initing the world; move up
 
-        this.getServer().prepareLevels(serverLevel.getChunkSource().chunkMap.progressListener, serverLevel);
+        this.getServer().theGame().prepareLevels(serverLevel, serverLevel.getChunkSource().chunkMap.progressListener);
         io.papermc.paper.FeatureHooks.tickEntityManager(serverLevel); // SPIGOT-6526: Load pending entities so they are available to the API // Paper - chunk system
 
         new WorldLoadEvent(serverLevel.getWorld()).callEvent();
@@ -1660,7 +1660,7 @@ public final class CraftServer implements Server {
         CraftPlayer craftPlayer = (CraftPlayer) player;
 
         // Create a players Crafting Inventory and get the recipe
-        CraftingMenu container = new CraftingMenu(-1, craftPlayer.getHandle().getInventory());
+        CraftingMenu container = new CraftingMenu(-1, craftPlayer.getHandle().getInventory(), List.of());
         CraftingContainer craftingContainer = container.craftSlots;
         ResultContainer craftResult = container.resultSlots;
 
@@ -2990,7 +2990,7 @@ public final class CraftServer implements Server {
     @Override
     public void playSound(final net.kyori.adventure.sound.Sound sound, final double x, final double y, final double z) {
         org.spigotmc.AsyncCatcher.catchOp("play sound");
-        io.papermc.paper.adventure.PaperAdventure.asSoundPacket(sound, x, y, z, sound.seed().orElseGet(this.console.theGame().overworld().getRandom()::nextLong), this.playSound0(x, y, z, this.console.getAllLevels()));
+        io.papermc.paper.adventure.PaperAdventure.asSoundPacket(sound, x, y, z, sound.seed().orElseGet(this.console.theGame().overworld().getRandom()::nextLong), this.playSound0(x, y, z, this.console.theGame().getAllLevels()));
     }
 
     @Override

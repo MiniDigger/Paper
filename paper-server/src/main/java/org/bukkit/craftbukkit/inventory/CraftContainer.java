@@ -224,10 +224,10 @@ public class CraftContainer extends AbstractContainerMenu {
         // SPIGOT-4598 - we should still delegate the shift click handler
         switch (this.cachedType) {
             case WORKBENCH:
-                this.delegate = new CraftingMenu(windowId, bottom);
+                this.delegate = new CraftingMenu(windowId, bottom, List.of());
                 break;
             case ANVIL:
-                this.delegate = new AnvilMenu(windowId, bottom);
+                this.delegate = new AnvilMenu(windowId, bottom, List.of());
                 break;
         }
     }

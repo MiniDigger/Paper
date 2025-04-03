@@ -69,7 +69,7 @@ public class CraftWorldInfo implements WorldInfo {
     public org.bukkit.generator.BiomeProvider vanillaBiomeProvider() {
         final net.minecraft.world.level.levelgen.RandomState randomState;
         if (vanillaChunkGenerator instanceof net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
-            randomState = net.minecraft.world.level.levelgen.RandomState.create(noiseBasedChunkGenerator.generatorSettings().value(),
+            randomState = net.minecraft.world.level.levelgen.RandomState.create(noiseBasedChunkGenerator.settings.value(),
                 registryAccess.lookupOrThrow(net.minecraft.core.registries.Registries.NOISE), getSeed());
         } else {
             randomState = net.minecraft.world.level.levelgen.RandomState.create(net.minecraft.world.level.levelgen.NoiseGeneratorSettings.dummy(),

@@ -87,12 +87,13 @@
          LOGGER.info("Loading properties");
          DedicatedServerProperties properties = this.settings.getProperties();
          if (this.isSingleplayer()) {
-@@ -133,10 +_,50 @@
+@@ -133,10 +_,51 @@
              this.setLocalIp(properties.serverIp);
          }
  
 +        // Spigot start
-+        this.setPlayerList(new DedicatedPlayerList(this, this.theGame, this.playerDataStorage));
++        // Paper - TODO: we'll see what breaks if this isn't here
++        //this.setPlayerList(new DedicatedPlayerList(this, this.theGame, this.playerDataStorage));
 +        org.spigotmc.SpigotConfig.init((java.io.File) this.options.valueOf("spigot-settings"));
 +        org.spigotmc.SpigotConfig.registerCommands();
 +        // Spigot end
@@ -219,6 +220,15 @@
              this,
              packRepository,
              worldStem,
+@@ -218,7 +_,7 @@
+         String string = String.format(Locale.ROOT, "%.3fs", l / 1.0E9);
+         LOGGER.info("Done ({})! For help, type \"help\"", string);
+         if (properties.announcePlayerAchievements != null) {
+-            theGame.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(properties.announcePlayerAchievements, theGame);
++            theGame.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(properties.announcePlayerAchievements, theGame.overworld());
+         }
+ 
+         long maxTickLength = this.getMaxTickLength();
 @@ -245,7 +_,7 @@
  
      @Override
@@ -262,7 +272,7 @@
 +        while ((servercommand = this.serverCommandQueue.poll()) != null) {
 +            // Paper end - Perf: use proper queue
 +            // CraftBukkit start - ServerCommand for preprocessing
-+            org.bukkit.event.server.ServerCommandEvent event = new org.bukkit.event.server.ServerCommandEvent(this.consoleInput, servercommand.msg);
++            org.bukkit.event.server.ServerCommandEvent event = new org.bukkit.event.server.ServerCommandEvent(this.console, servercommand.msg);
 +            this.server.getPluginManager().callEvent(event);
 +            if (event.isCancelled()) continue;
 +            servercommand = new ConsoleInput(event.getCommand(), servercommand.source);
