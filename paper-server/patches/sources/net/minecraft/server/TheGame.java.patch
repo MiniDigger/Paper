@@ -1,6 +1,23 @@
 --- a/net/minecraft/server/TheGame.java
 +++ b/net/minecraft/server/TheGame.java
-@@ -132,7 +_,7 @@
+@@ -118,6 +_,7 @@
+     private final CustomBossEvents customBossEvents = new CustomBossEvents();
+     private final MinecraftServer server;
+     private final PlayerList playerList;
++    public final ChunkProgressListenerFactory progressListenerFactory;
+     private final ServerTickRateManager tickRateManager;
+ 
+     private TheGame(
+@@ -125,14 +_,15 @@
+         PackRepository packRepository,
+         WorldStem worldStem,
+         LevelStorageSource.LevelStorageAccess levelStorageAccess,
+-        Function<TheGame, PlayerList> function
++        Function<TheGame, PlayerList> function,
++        ChunkProgressListenerFactory progressListenerFactory
+     ) {
+         this.storageSource = levelStorageAccess;
+         this.server = minecraftServer;
          this.registries = worldStem.registries();
          this.worldData = worldStem.worldData();
          this.playerList = function.apply(this);
@@ -9,6 +26,14 @@
          if (!this.registries.compositeAccess().lookupOrThrow(Registries.LEVEL_STEM).containsKey(LevelStem.OVERWORLD)) {
              throw new IllegalStateException("Missing Overworld dimension data");
          } else {
+@@ -150,6 +_,7 @@
+             this.resources.managers.getRecipeManager().finalizeRecipeLoading(this.worldData.enabledFeatures());
+             this.fuelValues = FuelValues.vanillaBurnTimes(this.registries.compositeAccess(), this.worldData.enabledFeatures());
+             this.tickRateManager = new ServerTickRateManager(this);
++            this.progressListenerFactory = progressListenerFactory;
+         }
+     }
+ 
 @@ -209,6 +_,22 @@
          return this.levels.get(resourceKey);
      }
@@ -40,7 +65,14 @@
          MinecraftServer minecraftServer,
          PackRepository packRepository,
          WorldStem worldStem,
-@@ -311,13 +_,7 @@
+@@ -305,19 +_,13 @@
+         ChunkProgressListenerFactory chunkProgressListenerFactory,
+         Function<TheGame, PlayerList> function
+     ) {
+-        TheGame theGame = new TheGame(minecraftServer, packRepository, worldStem, levelStorageAccess, function);
++        TheGame theGame = new TheGame(minecraftServer, packRepository, worldStem, levelStorageAccess, function, chunkProgressListenerFactory); // Paper
+         if (!JvmProfiler.INSTANCE.isRunning()) {
+         }
  
          boolean flag = false;
          ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onWorldLoadedStarted();
